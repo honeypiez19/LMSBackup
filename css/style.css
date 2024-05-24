@@ -1,0 +1,140 @@
+@media (max-width: 576px) {
+  .filter-card {
+    /* มีขนาด flex ความกว้าง 100% แต่ไม่สามารถย่อหรือขยายได้ */
+    flex: 0 0 100%;
+    /* ความกว้าง 100% ของพื้นที่ที่หน้าจอมีความกว้างไม่เกิน 576px */
+    max-width: 100%;
+  }
+}
+@media (max-width: 768px) {
+  /* Styles for mobile devices */
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Styles for tablets */
+}
+
+@media (min-width: 1025px) {
+  /* Styles for desktops */
+}
+/* Class --------------------------------------------------------------------- */
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="file"] {
+  border-radius: 50px;
+}
+
+button[type="submit"],
+button[type="reset"],
+button[type="button"] {
+  /* width: 120px; */
+  border-radius: 50px;
+}
+
+/* Class */
+.login-container {
+  max-width: 400px;
+  margin: 250px auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-weight: bold;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+}
+
+.form-group button {
+  width: 100%;
+  padding: 10px;
+  background-image: linear-gradient(
+    to right,
+    #00d2ff 0%,
+    #3a7bd5 51%,
+    #00d2ff 100%
+  );
+  border: none;
+  border-radius: 50px;
+  text-align: center;
+  transition: 0.5s;
+  background-size: 200% auto;
+  color: white;
+  box-shadow: 0 0 20px #eee;
+  display: block;
+}
+
+.form-group button:hover {
+  background-position: right center; /* change the direction of the change here */
+  color: #fff;
+  text-decoration: none;
+}
+
+.form-select {
+  border-radius: 50px;
+}
+
+.card {
+  /* 2px และ 2px: กำหนดขนาดของเงาในแนวแกน X และ Y ตามลำดับ | 5px: กำหนดรัศมีของเงา | rgba(0, 0, 0, 0.3): สีดำที่มีความโปร่งแสงเป็น 30% */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  border: none;
+}
+
+.card-comfirm {
+  width: 130px;
+}
+
+.card-approve {
+  width: 120px;
+}
+
+.button-shadow {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  border: none;
+}
+
+.red-text {
+  color: red;
+}
+
+/* id --------------------------------------------------------------------- */
+
+/* ปุ่ม reset รหัสพนักงานกับชื่อ */
+#resetCode,
+#resetName {
+  width: 40px;
+  border-radius: 0 50px 50px 0;
+}
+
+/* ปุ่มเพิ่มหนักงานใหม่ */
+#addEmp {
+  width: 80px;
+  height: 80px;
+  border-radius: 100px 100px 100px 100px;
+  position: fixed;
+  bottom: 30px;
+  z-index: 9999; /* ให้ปุ่มอยู่ด้านหน้าของเนื้อหาอื่น */
+  background-color: deeppink;
+}
+
+/* ปุ่มไฟล์แนบ มีไฟล์กับไม่มีไฟล์ */
+#imgBtn,
+#imgNoBtn {
+  border-radius: 100px 100px 100px 100px;
+}
