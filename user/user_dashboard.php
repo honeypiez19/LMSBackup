@@ -217,7 +217,7 @@ $sql_leave_personal = "SELECT
     ) AS leave_personal_count,
     (SELECT Leave_personal FROM employee WHERE Emp_usercode = :userCode) AS total_personal
 FROM leave_items
-WHERE Leave_ID = '1' AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
+WHERE Leave_ID = '1' AND Emp_usercode = :userCode AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
 
 $stmt_leave_personal = $conn->prepare($sql_leave_personal);
 $stmt_leave_personal->bindParam(':userCode', $userCode);
@@ -294,7 +294,7 @@ $sql_leave_personal_no = "SELECT
     ) AS leave_personal_no_count,
     (SELECT Leave_personal_no FROM employee WHERE Emp_usercode = :userCode) AS total_personal_no
 FROM leave_items
-WHERE Leave_ID = '2' AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
+WHERE Leave_ID = '2' AND Emp_usercode = :userCode AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
 
 $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
 $stmt_leave_personal_no->bindParam(':userCode', $userCode);
@@ -369,7 +369,7 @@ END
 ) AS leave_sick_count,
 (SELECT Leave_sick FROM employee WHERE Emp_usercode = :userCode) AS total_sick
 FROM leave_items
-WHERE Leave_ID = '3' AND YEAR(Create_datetime) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
+WHERE Leave_ID = '3' AND Emp_usercode = :userCode AND YEAR(Create_datetime) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
 
 $stmt_leave_sick = $conn->prepare($sql_leave_sick);
 $stmt_leave_sick->bindParam(':userCode', $userCode);
@@ -445,7 +445,7 @@ $sql_leave_sick_work = "SELECT
     ) AS leave_sick_work_count,
     (SELECT Leave_sick_work FROM employee WHERE Emp_usercode = :userCode) AS total_leave_sick_work
 FROM leave_items
-WHERE Leave_ID = '4' AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
+WHERE Leave_ID = '4' AND Emp_usercode = :userCode AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
 
 $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
 $stmt_leave_sick_work->bindParam(':userCode', $userCode);
@@ -524,7 +524,7 @@ $sql_leave_annual = "SELECT
     ) AS leave_annual_count,
     (SELECT Leave_annual FROM employee WHERE Emp_usercode = :userCode) AS total_annual
 FROM leave_items
-WHERE Leave_ID = '5' AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00')  AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
+WHERE Leave_ID = '5' AND Emp_usercode = :userCode AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00')  AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
 
 $stmt_leave_annual = $conn->prepare($sql_leave_annual);
 $stmt_leave_annual->bindParam(':userCode', $userCode);
@@ -580,7 +580,7 @@ echo '</div>';
                             <?php
 // ขาดงาน
 $selectedYear = date('Y');
-$sql_absence_work = "SELECT COUNT(Items_ID) AS absence_work_count FROM leave_items WHERE Leave_ID = '6' AND YEAR(Leave_date_start) = '$selectedYear'";
+$sql_absence_work = "SELECT COUNT(Items_ID) AS absence_work_count FROM leave_items WHERE Leave_ID = '6' AND Emp_usercode = '$userCode' AND YEAR(Leave_date_start) = '$selectedYear'";
 $result_absence_work = $conn->query($sql_absence_work)->fetch(PDO::FETCH_ASSOC);
 $sum_absence_work = $row['Absence_work'] - $result_absence_work['absence_work_count'];
 
@@ -617,7 +617,7 @@ echo '</div>';
                             <?php
 // มาสาย
 $selectedYear = date('Y');
-$sql_late = "SELECT COUNT(Items_ID) AS late_count FROM leave_items WHERE Leave_ID = '7' AND YEAR(Leave_date_start) = '$selectedYear'";
+$sql_late = "SELECT COUNT(Items_ID) AS late_count FROM leave_items WHERE Leave_ID = '7' AND Emp_usercode = '$userCode' AND YEAR(Leave_date_start) = '$selectedYear'";
 $result_late = $conn->query($sql_late)->fetch(PDO::FETCH_ASSOC);
 $sum_late = $row['Late'] - $result_late['late_count'];
 
@@ -676,7 +676,7 @@ $sql_other = "SELECT
     ) AS other_count,
     (SELECT Other FROM employee WHERE Emp_usercode = :userCode) AS total_other
 FROM leave_items
-WHERE Leave_ID = '8' AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
+WHERE Leave_ID = '8' AND Emp_usercode = :userCode AND YEAR(Leave_date_start) = :selectedYear AND NOT (TIME(Leave_time_start) >= '11:45:00' AND TIME(Leave_time_end) <= '12:45:00') AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0'";
 $stmt_other = $conn->prepare($sql_other);
 $stmt_other->bindParam(':userCode', $userCode);
 $stmt_other->bindParam(':selectedYear', $selectedYear);
@@ -724,7 +724,6 @@ echo '</div>';
             </div>
         </div>
     </div>
-
 
     <div class="container-fluid">
         <div class="row">
@@ -905,7 +904,7 @@ if (!isset($_GET['page'])) {
 }
 
 // สร้างคำสั่ง SQL
-$sql = "SELECT * FROM leave_items WHERE Emp_usercode = '$userCode' AND Month(Create_datetime) = '$selectedMonth' AND Leave_status = '0' ORDER BY Create_datetime DESC ";
+$sql = "SELECT * FROM leave_items WHERE Emp_usercode = '$userCode' AND Month(Create_datetime) = '$selectedMonth' ORDER BY Create_datetime DESC ";
 
 // หาจำนวนรายการทั้งหมด
 $result = $conn->query($sql);

@@ -99,7 +99,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<tr class="text-center align-middle">';
     echo '<td>' . 'ลากิจได้รับค่าจ้าง' . '</td>';
     for ($i = 1; $i <= 12; $i++) {
-        $sql_count = "SELECT COUNT(Items_ID) AS leave_personal_count FROM leave_items WHERE Leave_ID = '1' AND YEAR(Leave_date_start) = '$selectedYear' AND MONTH(Leave_date_start) = '$i'";
+        $sql_count = "SELECT COUNT(Items_ID) AS leave_personal_count FROM leave_items WHERE Leave_ID = '1' AND YEAR(Leave_date_start) = '$selectedYear' AND MONTH(Leave_date_start) = '$i' ORDER BY ";
         $result_count = $conn->query($sql_count);
         $row_leave_personal_count = $result_count->fetch(PDO::FETCH_ASSOC);
         echo '<td>' . $row_leave_personal_count['leave_personal_count'] . '</td>';

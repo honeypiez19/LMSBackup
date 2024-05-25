@@ -167,20 +167,56 @@ if ($result->rowCount() > 0) {
         echo '<td>' . $row['Emp_usercode'] . '</td>';
         echo '<td>' . $row['Emp_name'] . '</td>';
         echo '<td>' . $row['Emp_department'] . '</td>';
+
+        // echo '<td>';
+        // if ($row['Emp_department'] == 1) {
+        //     echo 'RD';
+        // } elseif ($row['Emp_department'] == 2) {
+        //     echo 'HR';
+        // } elseif ($row['Emp_department'] == 3) {
+        //     echo 'Sales';
+        // } elseif ($row['Emp_department'] == 4) {
+        //     echo 'Purchase';
+        // } elseif ($row['Emp_department'] == 5) {
+        //     echo 'Store';
+        // } elseif ($row['Emp_department'] == 6) {
+        //     echo 'CAD1';
+        // } elseif ($row['Emp_department'] == 7) {
+        //     echo 'CAD2';
+        // } elseif ($row['Emp_department'] == 8) {
+        //     echo 'CAM';
+        // } elseif ($row['Emp_department'] == 9) {
+        //     echo 'Production';
+        // } elseif ($row['Emp_department'] == 10) {
+        //     echo 'QC';
+        // } elseif ($row['Emp_department'] == 11) {
+        //     echo 'Account';
+        // } elseif ($row['Emp_department'] == 12) {
+        //     echo 'Machine';
+        // } elseif ($row['Emp_department'] == 13) {
+        //     echo 'Finishing';
+        // } else {
+        //     echo 'Unknown';
+        // }
+        // echo '</td>';
+
         echo '<td>' . $row['Emp_yearexp'] . '</td>';
-        echo '<td>';
-        if ($row['Emp_level'] == 1) {
-            echo 'Staff';
-        } elseif ($row['Emp_level'] == 2) {
-            echo 'Chief';
-        } elseif ($row['Emp_level'] == 3) {
-            echo 'Manager';
-        } elseif ($row['Emp_level'] == 4) {
-            echo 'Admin';
-        } else {
-            echo 'Unknown';
-        }
-        echo '</td>';
+        echo '<td>' . $row['Emp_level'] . '</td>';
+
+        // echo '<td>';
+        // if ($row['Emp_level'] == 1) {
+        //     echo 'Staff';
+        // } elseif ($row['Emp_level'] == 2) {
+        //     echo 'Chief';
+        // } elseif ($row['Emp_level'] == 3) {
+        //     echo 'Manager';
+        // } elseif ($row['Emp_level'] == 4) {
+        //     echo 'Admin';
+        // } else {
+        //     echo 'Unknown';
+        // }
+        // echo '</td>';
+
         echo '<td>' . $row['Emp_email'] . '</td>';
         // echo '<td>' . $row['Emp_id_line'] . '</td>';
         echo '<td>' . $row['Emp_phone'] . '</td>';
@@ -201,7 +237,6 @@ if ($result->rowCount() > 0) {
         $rowNumber--;
     }
 }
-
 ?>
             </tbody>
         </table>
@@ -222,8 +257,7 @@ if ($result->rowCount() > 0) {
                     </div>
                 </div>
             </div>
-        </div>
-        <?php
+            <?php
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
 
@@ -253,55 +287,55 @@ echo '</div>';
 
 ?>
 
-    </div>
-    <div class="mt-3 container-fluid">
-        <!-- ปุ่มเพิ่มพนักงาน -->
-        <div class="row d-flex justify-content-end">
-            <div class="col-1">
-                <button class="btn" id="addEmp" data-bs-toggle="modal" data-bs-target="#addEmployeeModal"><i
-                        class="fa-solid fa-user-plus fa-2xl" style="color: #ffffff;"></i></button>
-            </div>
         </div>
-        <!-- Modal เพิ่มพนักงาน -->
-        <div class="modal fade" id="addEmployeeModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="addEmployeeModalLabel">เพิ่มข้อมูลพนักงาน</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="addEmpForm">
-                            <div class="row">
-                                <h5>ข้อมูลการเข้าระบบ</h5>
-                                <div class="col-6">
-                                    <label for="codeLabel"><span style="color: red;">* </span>รหัสพนักงาน</label>
-                                    <input class="form-control" type="text" id="add_usercode" name="add_usercode">
+        <div class="mt-3 container-fluid">
+            <!-- ปุ่มเพิ่มพนักงาน -->
+            <div class="row d-flex justify-content-end">
+                <div class="col-1">
+                    <button class="btn" id="addEmp" data-bs-toggle="modal" data-bs-target="#addEmployeeModal"><i
+                            class="fa-solid fa-user-plus fa-2xl" style="color: #ffffff;"></i></button>
+                </div>
+            </div>
+            <!-- Modal เพิ่มพนักงาน -->
+            <div class="modal fade" id="addEmployeeModal" data-bs-backdrop="static" data-bs-keyboard="false"
+                tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="addEmployeeModalLabel">เพิ่มข้อมูลพนักงาน</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addEmpForm">
+                                <div class="row">
+                                    <h5>ข้อมูลการเข้าระบบ</h5>
+                                    <div class="col-6">
+                                        <label for="codeLabel"><span style="color: red;">* </span>รหัสพนักงาน</label>
+                                        <input class="form-control" type="text" id="add_usercode" name="add_usercode">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="usernameLabel">ชื่อผู้ใช้</label>
+                                        <input class="form-control" type="text" id="add_username" name="add_username">
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <label for="usernameLabel">ชื่อผู้ใช้</label>
-                                    <input class="form-control" type="text" id="add_username" name="add_username">
+                                <div class="mt-3 row">
+                                    <div class="col-6">
+                                        <label for="passwordLabel">รหัสผ่าน</label>
+                                        <input class="form-control" type="text" id="add_password" name="add_password"
+                                            pattern="[0-9]{1,}" title="กรุณากรอกรหัสผ่านเป็นตัวเลขเท่านั้น">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mt-3 row">
-                                <div class="col-6">
-                                    <label for="passwordLabel">รหัสผ่าน</label>
-                                    <input class="form-control" type="text" id="add_password" name="add_password"
-                                        pattern="[0-9]{1,}" title="กรุณากรอกรหัสผ่านเป็นตัวเลขเท่านั้น">
-                                </div>
-                            </div>
-                            <div class="mt-3 row">
-                                <h5>ข้อมูลพนักงาน</h5>
-                                <div class="col-3">
-                                    <label for="nameLabel">ชื่อ - นามสกุล</label>
-                                    <input class="form-control" type="text" id="add_name" name="add_name">
-                                </div>
-                                <div class="col-3">
-                                    <label for="levelLabel">แผนก</label>
-                                    <!-- <input class="form-control" list="departmentList" id="add_department"
+                                <div class="mt-3 row">
+                                    <h5>ข้อมูลพนักงาน</h5>
+                                    <div class="col-3">
+                                        <label for="nameLabel">ชื่อ - นามสกุล</label>
+                                        <input class="form-control" type="text" id="add_name" name="add_name">
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="levelLabel">แผนก</label>
+                                        <!-- <input class="form-control" list="departmentList" id="add_department"
                                         name="add_department" type="text"> -->
-                                    <!-- <datalist id="departmentList">
+                                        <!-- <datalist id="departmentList">
                                         <?php
 // สร้างคำสั่ง SQL เพื่อดึงข้อมูล
 $sql = "SELECT * FROM employee_department";
@@ -315,9 +349,9 @@ while ($row = $stmt->fetch()) {
 }
 ?>
                                     </datalist> -->
-                                    <select class="form-control" id="add_department" style="border-radius: 20px;">
-                                        <option selected>กรุณาเลือกแผนก</option>
-                                        <?php
+                                        <select class="form-control" id="add_department" style="border-radius: 20px;">
+                                            <option value="select" selected>กรุณาเลือกแผนก</option>
+                                            <?php
 $department_sql = "SELECT * FROM employee_department";
 $department_result = $conn->query($department_sql);
 if ($department_result->rowCount() > 0) {
@@ -326,17 +360,19 @@ if ($department_result->rowCount() > 0) {
     }
 }
 ?>
-                                    </select>
-                                </div>
-                                <div class="col-3">
-                                    <label for="yearexpLabel">อายุงาน</label>
-                                    <input class="form-control" type="text" id="add_yearexp" name="add_yearexp">
-                                </div>
-                                <div class="col-3">
-                                    <label for="levelLabel">ระดับ</label>
-                                    <select class="form-control" id="add_level" style="border-radius: 20px;">
-                                        <option selected>กรุณาเลือกระดับ</option>
-                                        <?php
+                                        </select>
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="yearexpLabel">อายุงาน</label>
+                                        <!-- <input class="form-control" type="text" id="add_yearexp" name="add_yearexp"> -->
+                                        <input class="form-control" type="text" id="add_yearexp" name="add_yearexp"
+                                            onchange="calculateLeaveDays()">
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="levelLabel">ระดับ</label>
+                                        <select class="form-control" id="add_level" style="border-radius: 20px;">
+                                            <option value="select" selected>กรุณาเลือกระดับ</option>
+                                            <?php
 $level_sql = "SELECT * FROM employee_level";
 $level_result = $conn->query($level_sql);
 if ($level_result->rowCount() > 0) {
@@ -345,201 +381,246 @@ if ($level_result->rowCount() > 0) {
     }
 }
 ?>
-                                    </select>
+                                        </select>
 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mt-3 row">
-                                <div class="col-3">
-                                    <label for="emailLabel">อีเมล</label>
-                                    <input class="form-control" type="text" id="add_email" name="add_email">
-                                </div>
-                                <!-- <div class="col-6">
+                                <div class="mt-3 row">
+                                    <div class="col-3">
+                                        <label for="emailLabel">อีเมล</label>
+                                        <input class="form-control" type="text" id="add_email" name="add_email">
+                                    </div>
+                                    <!-- <div class="col-6">
                                     <label for="depatLabel">ไลน์</label>
                                     <input class="form-control" type="text" id="add_id_line" name="add_id_line">
                                 </div> -->
-                                <div class="col-3">
-                                    <label for="phoneLabel">เบอร์โทรศัพท์</label>
-                                    <input class="form-control" type="text" id="add_phone" name="add_phone">
+                                    <div class="col-3">
+                                        <label for="phoneLabel">เบอร์โทรศัพท์</label>
+                                        <input class="form-control" type="text" id="add_phone" name="add_phone">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mt-3 row">
-                                <h5>จำนวนวันลาที่ได้รับ</h5>
-                                <div class="col-3">
-                                    <label for="personalLabel">ลากิจได้รับค่าจ้าง</label>
-                                    <input class="form-control" type="text" id="add_personal" name="add_personal">
+                                <div class="mt-3 row">
+                                    <h5>จำนวนวันลาที่ได้รับ</h5>
+                                    <div class="col-3">
+                                        <label for="personalLabel">ลากิจได้รับค่าจ้าง</label>
+                                        <input class="form-control" type="text" id="add_personal" name="add_personal">
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="personalNoLabel">ลากิจไม่ได้รับค่าจ้าง</label>
+                                        <input class="form-control" type="text" id="add_personal_no"
+                                            name="add_personal_no">
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="sickLabel">ลาป่วย</label>
+                                        <input class="form-control" type="text" id="add_sick" name="add_sick">
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="sickWorkLabel">ลาป่วยจากงาน</label>
+                                        <input class="form-control" type="text" id="add_sick_work" name="add_sick_work">
+                                    </div>
                                 </div>
-                                <div class="col-3">
-                                    <label for="personalNoLabel">ลากิจไม่ได้รับค่าจ้าง</label>
-                                    <input class="form-control" type="text" id="add_personal_no" name="add_personal_no">
+                                <div class="mt-3 row">
+                                    <div class="col-3">
+                                        <label for="annualLabel">ลาพักร้อน</label>
+                                        <input class="form-control" type="text" id="add_annual">
+                                    </div>
+                                    <div class="col-3">
+                                        <label for="otherLabel">อื่น ๆ</label>
+                                        <input class="form-control" type="text" id="add_other">
+                                    </div>
                                 </div>
-                                <div class="col-3">
-                                    <label for="sickLabel">ลาป่วย</label>
-                                    <input class="form-control" type="text" id="add_sick" name="add_sick">
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-danger mx-2" id="cancelBtn">ยกเลิก</button>
+                                    <button type="submit" class="btn btn-success">บันทึก</button>
                                 </div>
-                                <div class="col-3">
-                                    <label for="sickWorkLabel">ลาป่วยจากงาน</label>
-                                    <input class="form-control" type="text" id="add_sick_work" name="add_sick_work">
-                                </div>
-                            </div>
-                            <div class="mt-3 row">
-                                <div class="col-3">
-                                    <label for="annualLabel">ลาพักร้อน</label>
-                                    <input class="form-control" type="text" id="add_annual">
-                                </div>
-                                <div class="col-3">
-                                    <label for="otherLabel">อื่น ๆ</label>
-                                    <input class="form-control" type="text" id="add_other">
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <button type="button" class="btn btn-danger mx-2" id="cancelBtn">ยกเลิก</button>
-                                <button type="submit" class="btn btn-success">บันทึก</button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-    $(document).ready(function() {
-        $('#addEmpForm').on('submit', function(e) {
-            var addUsername = '<?php echo $userName; ?>';
-            e.preventDefault();
-            $.ajax({
-                type: 'POST',
-                url: '../ajax_add_employee.php',
-                data: $('#addEmpForm').serialize() + '&addUsername=' + addUsername,
+        <script>
+        $(document).ready(function() {
+            $('#addEmpForm').on('submit', function(e) {
+                var addUsername = '<?php echo $userName; ?>';
+                var add_department = $("#add_department").val();
+                var add_level = $("#add_level").val();
+                var add_annual = $("#add_annual").val();
+                var add_other = $("#add_other").val();
 
-                success: function(response) {
-                    alert(response);
-                    location.reload();
-                },
-                error: function(xhr, status, error) {
-                    console.error(xhr.responseText);
-                    alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+                alert(add_department)
+                alert(add_level)
+
+                if (add_department !== 'select' && add_level !== 'select') {
+                    e.preventDefault();
+                    $.ajax({
+                        type: 'POST',
+                        url: '../ajax_add_employee.php',
+                        data: $('#addEmpForm').serialize() + '&addUsername=' + addUsername +
+                            '&add_department=' + add_department +
+                            '&add_level=' + add_level +
+                            '&add_annual=' + add_annual +
+                            '&add_other=' + add_other,
+                        success: function(response) {
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(xhr.responseText);
+                            alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+                        }
+                    });
+                } else {
+                    alert('กรุณาเลือกแผนกและระดับตำแหน่ง');
+                    e.preventDefault(); // หยุดการส่งข้อมูล
                 }
             });
-        });
-        $('.edit-btn').click(function() {
-            var usercode = $(this).data('usercode');
-            $.ajax({
-                url: '../ajax_get_employee_data.php',
-                method: 'POST',
-                data: {
-                    usercode: usercode
-                },
-                success: function(response) {
-                    $('#empModalBody').html(response);
-                    $('#empModal').modal('show');
-                }
-            });
-            // alert()
-        });
-        $('.delete-btn').click(function() {
-            var usercode = $(this).data('usercode');
-            if (confirm('คุณต้องการลบข้อมูลพนักงานนี้ใช่หรือไม่?')) {
+            $('.edit-btn').click(function() {
+                var usercode = $(this).data('usercode');
+
+
                 $.ajax({
-                    type: 'POST',
-                    url: '../ajax_delete_employee.php',
+                    url: '../ajax_get_employee_data.php',
+                    method: 'POST',
                     data: {
                         usercode: usercode
                     },
                     success: function(response) {
-                        alert('ลบข้อมูลพนักงานสำเร็จ');
-                        location.reload(); // Reload the page after successful deletion
-                    },
-                    error: function(xhr, status, error) {
-                        alert('เกิดข้อผิดพลาดในการลบข้อมูล');
-                        console.error(xhr.responseText);
+                        $('#empModalBody').html(response);
+                        $('#empModal').modal('show');
                     }
                 });
-                alert(usercode)
-            }
-        });
-        $("#saveChangesBtn").click(function() {
-            var updUsername = '<?php echo $userName; ?>';
-            var usercode = $("#edit_usercode").val();
-            var name = $("#edit_name").val();
-            var department = $("#edit_department").val();
-            var yearexp = $("#edit_yearexp").val();
-            var level = $("#edit_level").val();
-            var email = $("#edit_email").val();
-            var id_line = $("#edit_id_line").val();
-            var phone = $("#edit_phone").val();
-            var username = $("#edit_username").val();
-            var password = $("#edit_password").val();
-
-            var personal = $("#edit_personal").val();
-            var personalNo = $("#edit_personal_no").val();
-            var sick = $("#edit_sick").val();
-            var sickWork = $("#edit_sick_work").val();
-            var annual = $("#edit_annual").val();
-            var other = $("#edit_other").val();
-
-            $.ajax({
-                url: "../ajax_upd_employee.php",
-                type: "POST",
-                data: {
-                    usercode: usercode,
-                    name: name,
-                    department: department,
-                    yearexp: yearexp,
-                    level: level,
-                    email: email,
-                    id_line: id_line,
-                    phone: phone,
-                    username: username,
-                    password: password,
-                    updUsername: updUsername,
-                    personal: personal,
-                    personalNo: personalNo,
-                    sick: sick,
-                    sickWork: sickWork,
-                    annual: annual,
-                    other: other
-                },
-                success: function(response) {
-                    Swal.fire({
-                        title: "แก้ไขข้อมูลสำเร็จ",
-                        text: "",
-                        icon: "success",
-                        confirmButtonText: "ตกลง",
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            location.reload();
+            });
+            $('.delete-btn').click(function() {
+                var usercode = $(this).data('usercode');
+                if (confirm('คุณต้องการลบข้อมูลพนักงานนี้ใช่หรือไม่?')) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '../ajax_delete_employee.php',
+                        data: {
+                            usercode: usercode
+                        },
+                        success: function(response) {
+                            alert('ลบข้อมูลพนักงานสำเร็จ');
+                            location.reload(); // Reload the page after successful deletion
+                        },
+                        error: function(xhr, status, error) {
+                            alert('เกิดข้อผิดพลาดในการลบข้อมูล');
+                            console.error(xhr.responseText);
                         }
                     });
+                    alert(usercode)
                 }
             });
-            // alert(empUsername);
+            $("#saveChangesBtn").click(function() {
+                var updUsername = '<?php echo $userName; ?>';
+                var usercode = $("#edit_usercode").val();
+                var name = $("#edit_name").val();
+                var department = $("#edit_department").val();
+                var yearexp = $("#edit_yearexp").val();
+                var level = $("#edit_level").val();
+                var email = $("#edit_email").val();
+                var id_line = $("#edit_id_line").val();
+                var phone = $("#edit_phone").val();
+                var username = $("#edit_username").val();
+                var password = $("#edit_password").val();
+
+                var personal = $("#edit_personal").val();
+                var personalNo = $("#edit_personal_no").val();
+                var sick = $("#edit_sick").val();
+                var sickWork = $("#edit_sick_work").val();
+                var annual = $("#edit_annual").val();
+                var other = $("#edit_other").val();
+
+                $.ajax({
+                    url: "../ajax_upd_employee.php",
+                    type: "POST",
+                    data: {
+                        usercode: usercode,
+                        name: name,
+                        department: department,
+                        yearexp: yearexp,
+                        level: level,
+                        email: email,
+                        id_line: id_line,
+                        phone: phone,
+                        username: username,
+                        password: password,
+                        updUsername: updUsername,
+                        personal: personal,
+                        personalNo: personalNo,
+                        sick: sick,
+                        sickWork: sickWork,
+                        annual: annual,
+                        other: other
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: "แก้ไขข้อมูลสำเร็จ",
+                            text: "",
+                            icon: "success",
+                            confirmButtonText: "ตกลง",
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    }
+                });
+                // alert(empUsername);
+            });
+            $("#nameSearch").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+            $("#codeSearch").on("keyup", function() {
+                var value2 = $(this).val().toLowerCase();
+                $("tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
+                });
+            });
+            $("#depSearch").on("keyup", function() {
+                var value3 = $(this).val().toLowerCase();
+                $("tbody tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
+                });
+            });
         });
 
-    });
-    $("#nameSearch").on("keyup", function() {
-        var value = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-        });
-    });
-    $("#codeSearch").on("keyup", function() {
-        var value2 = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value2) > -1);
-        });
-    });
-    $("#depSearch").on("keyup", function() {
-        var value3 = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
-        });
-    });
-    </script>
-    <script src="../js/popper.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/bootstrap.bundle.js"></script>
-    <script src="../js/bootstrap.bundle.min.js"></script>
+        // กรอกอายุงานให้จำนวนวันลาขึ้นเอง
+        function calculateLeaveDays() {
+            var yearsOfExperience = parseInt(document.getElementById("add_yearexp").value);
+            var personal = document.getElementById("add_personal");
+            var personalNo = document.getElementById("add_personal_no");
+            var sick = document.getElementById("add_sick");
+            var sickWork = document.getElementById("add_sick_work");
+            var annual = document.getElementById("add_annual");
+            var other = document.getElementById("add_other");
+
+            if (yearsOfExperience < 1) {
+                // ไม่ถึงปี
+                personal.value = "0"; // จำนวนวันลากิจได้รับค่าจ้าง
+                personalNo.value = "365"; // จำนวนวันลากิจไม่ได้รับค่าจ้าง
+                sick.value = "30"; // จำนวนวันลาป่วย
+                sickWork.value = "365"; // จำนวนวันลาป่วยจากงาน
+                annual.value = "0"; // จำนวนวันลาพักร้อน
+                other.value = "365"; // จำนวนวันลาพักร้อน
+            } else if (yearsOfExperience >= 1 && yearsOfExperience < 2) {
+                // ถ้าอายุงานอยู่ในช่วง 1-2 ปี
+                personal.value = "5"; // จำนวนวันลากิจได้รับค่าจ้าง
+                annual.value = "6"; // จำนวนวันลาพักร้อน
+            } else {
+                // ถ้าไม่อยู่ในช่วง 1-2 ปี ให้ล้างค่าทิ้ง
+                personal.value = "";
+                annual.value = "";
+            }
+        }
+        </script>
+        <script src="../js/popper.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>
+        <script src="../js/bootstrap.bundle.js"></script>
+        <script src="../js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

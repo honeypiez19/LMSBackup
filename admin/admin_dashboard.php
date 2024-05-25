@@ -472,12 +472,10 @@ echo '</div>';
                     $("tbody").append(newRow);
                 });
             },
-
             error: function(xhr, status, error) {
                 console.error('Error fetching data:', error);
             }
         });
-        alert(status)
     });
 
     $("#nameSearch").on("keyup", function() {
@@ -495,8 +493,8 @@ echo '</div>';
     });
     $(document).on('click', '.leaveChk', function() {
         var rowData = $(this).closest('tr').find('td');
-        var confirmStatus = $(rowData[6]).text();
-        var approveStatus = $(rowData[8]).text();
+        var confirmStatus = $(rowData[14]).text(); // สถานะ HR
+        var approveStatus = $(rowData[9]).text(); // สถานะอนุมัติหัวหน้า ผจก
 
         var confirmChk = '';
         var approveChk = '';
@@ -529,25 +527,20 @@ echo '</div>';
             '<p><strong>รหัสพนักงาน : </strong>' + $(rowData[1]).html() + '</p>' +
             '<p><strong>ชื่อ - นามสกุล : </strong>' + $(rowData[2]).html() + '</p>' +
             '<p><strong>รายการลา : </strong>' + $(rowData[3]).html() + '</p>' +
-            '<p><strong>วันเวลาที่ลา : </strong>' + $(rowData[4]).text() + ' ถึง ' + $(rowData[
-                5])
-            .text() + '</p>' +
-            '<p><strong>สถานะตรวจสอบ : </strong> ' + confirmChk + '</p>' +
-            '<p><strong>วันที่สร้างใบลา : </strong>' + $(rowData[7]).text() + '</p>' +
-            '<p><strong>สถานะอนุมัติ : </strong>' + approveChk + '</p>' +
-            '<p><strong>วันเวลาอนุมัติ : </strong>' + $(rowData[9]).text() + '</p>' +
-            '<p><strong>ระดับหัวหน้า : </strong>' + $(rowData[10]).text() + '</p>' +
-            '<p><strong>ระดับผู้จัดการขึ้นไป : </strong>' + $(rowData[11]).text() + '</p>' +
-            '<p><strong>เหตุผลอนุมัติ : </strong>' + $(rowData[12]).text() + '</p>'
+            '<p><strong>วันที่สร้างใบลา : </strong>' + $(rowData[4]).text() + '</p>' +
+            '<p><strong>วันเวลาที่ลา : </strong>' + $(rowData[5]).text() + ' ถึง ' + $(rowData[6]).text() +
+            '</p>' +
+            '<p><strong>สถานะใบลา : </strong><span style="color: red;">' + $(rowData[8]).text() +
+            '</span></p>' +
+            '<p><strong>สถานะ (เฉพาะ HR) : </strong> ' + confirmChk + '</p>'
         );
         // เมื่อคลิกปุ่ม "ผ่าน"
         $('.modal-footer .btn-success').on('click', function() {
             var userCode = $(rowData[1]).text(); // รหัสพนักงาน
-            var createDate = $(rowData[6]).text(); // วันที่สร้างใบลา
+            var createDate = $(rowData[4]).text(); // วันที่สร้างใบลา
             var checkFirm = '1'; // ผ่าน
 
             var userName = '<?php echo $userName; ?>';
-            alert(userName)
             $.ajax({
                 url: '../ajax_upd_status.php',
                 method: 'POST',
@@ -558,15 +551,14 @@ echo '</div>';
                     userName: userName
                 },
                 success: function(response) {
-                    // อัปเดตข้อมูลสำเร็จ ปิด modal
                     $('#leaveModal').modal('hide');
                     location.reload();
                 },
                 error: function(xhr, status, error) {
-                    // เกิดข้อผิดพลาดในการอัปเดตข้อมูล
                     console.error(error);
                 }
             });
+            alert(checkFirm)
         });
         // ปุ่มไม่ผ่าน
         $('.modal-footer .btn-danger').on('click', function() {
@@ -574,8 +566,7 @@ echo '</div>';
             var createDate = $(rowData[6]).text(); // วันที่สร้างใบลา
             var checkFirm = '2'; // ไม่ผ่าน
 
-            // var empUsername = '<?php echo $userName; ?>'; // นำค่า $empName มาใส่ตรงนี้
-            alert(checkFirm)
+            // var empUsername = '<?php echo $userName; ?>';
 
             $.ajax({
                 url: '../ajax_upd_status.php',
@@ -587,12 +578,10 @@ echo '</div>';
                     userName: userName
                 },
                 success: function(response) {
-                    // อัปเดตข้อมูลสำเร็จ ปิด modal
                     $('#leaveModal').modal('hide');
                     location.reload();
                 },
                 error: function(xhr, status, error) {
-                    // เกิดข้อผิดพลาดในการอัปเดตข้อมูล
                     console.error(error);
                 }
             });
