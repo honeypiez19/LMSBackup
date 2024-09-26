@@ -4,6 +4,8 @@ $servername = "192.168.100.122";
 $username = "samt";
 $password = "samtadmin12";
 $db = "LMS";
+// $db = "LMS2";
+
 $port = "3306";
 // Create connection
 // $conn = new mysqli($servername, $username, $password, $db, $port);

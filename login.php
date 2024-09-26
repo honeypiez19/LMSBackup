@@ -8,78 +8,65 @@
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <link rel="icon" href="../logo/logo.png">
+    <link rel="icon" href="logo/logo.png">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <link rel="stylesheet" href="css/flatpickr.min.css">
 
     <script src="js/jquery-3.7.1.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="js/flatpickr"></script>
+    <script src="js/sweetalert2.all.min.js"></script>
+    <script src="js/fontawesome.js"></script>
 
     <style>
-    body,
-    html {
-        height: 100%;
+    body {
         display: flex;
-        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f8f9fa;
     }
 
-    .container {
-        flex: 1;
-    }
-
-    .login-card {
-        max-width: 400px;
-        padding: 2rem;
+    .login-form {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
+        max-width: 400px;
         width: 100%;
     }
 
-    @media (max-width: 576px) {
-        .login-card {
-            padding: 1.5rem;
-        }
+    .login-form h2 {
+        margin-bottom: 20px;
     }
 
-    footer {
-        text-align: center;
-        padding: 20px;
-        background-color: #F5F5F5;
-        color: #696969;
+    .login-form .form-control {
+        margin-bottom: 15px;
+    }
+
+    .login-form button {
+        width: 100%;
     }
     </style>
 </head>
 
-<body class="d-flex flex-column">
-    <div class="container d-flex justify-content-center align-items-center">
-        <div class="card login-card">
-            <div class="card-body">
-                <h5 class="card-title text-center">เข้าสู่ระบบ</h5>
-                <form id="loginForm">
-                    <div class="mb-3">
-                        <label for="usercode" class="form-label">Usercode</label>
-                        <input type="text" class="form-control" id="usercode" name="usercode">
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password">
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
-                <div id="message" class="mt-3"></div>
+<body>
+    <div class="login-form">
+        <h2 class="text-center">เข้าสู่ระบบ</h2>
+        <form id="loginForm">
+            <div class="mb-3">
+                <label for="usercode" class="form-label">Usercode</label>
+                <input type="text" class="form-control" id="usercode" name="usercode" placeholder="Usercode" required>
             </div>
-        </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                    required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <div id="message" class="mt-3"></div>
     </div>
-    <footer>
-        <label>© Shippo Asahi Moulds (Thailand) Co., Ltd. All Rights Reserved.
-        </label>
-    </footer>
-
-    <!--
-    <form id="loginForm">
-        <input type="text" id="usercode" name="usercode" placeholder="Usercode"><br>
-        <input type="password" id="password" name="password" placeholder="Password"><br>
-        <button type="submit">Login</button>
-    </form> -->
-
-    <div id="message"></div>
 
     <script>
     $(document).ready(function() {
@@ -96,20 +83,171 @@
                     passWord: passWord
                 },
                 success: function(response) {
+                    // แสดงข้อความตามสถานะที่ได้รับ
                     if (response == "admin") {
-                        alert("Welcome Admin");
-                        window.location.href = "admin/admin_dashboard.php";
+                        // Swal.fire({
+                        //     title: "Welcome admin",
+                        //     text: "Redirecting to admin dashboard...",
+                        //     icon: "success"
+                        // }).then(() => {
+                        //     window.location.href = "admin/admin_dashboard.php";
+                        // });
+                        let timerInterval;
+
+                        Swal.fire({
+                            title: "Welcome admin",
+                            html: "Redirecting to admin dashboard...",
+                            timer: 500,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getHtmlContainer()
+                                    .querySelector("b");
+                                timerInterval = setInterval(() => {
+                                    timer.textContent = Swal
+                                        .getTimerLeft();
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                window.location.href = "admin/admin_dashboard.php";
+                            }
+                        });
                     } else if (response == "user") {
-                        alert("Welcome User");
-                        window.location.href = "user/user_dashboard.php";
+                        // Swal.fire({
+                        //     title: "Welcome user",
+                        //     text: "Redirecting to user dashboard...",
+                        //     icon: "success"
+                        // }).then(() => {
+                        //     window.location.href = "user/user_dashboard.php";
+                        // });
+                        Swal.fire({
+                            title: "Welcome user",
+                            html: "Redirecting to user dashboard...",
+                            timer: 500,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getHtmlContainer()
+                                    .querySelector("b");
+                                timerInterval = setInterval(() => {
+                                    timer.textContent = Swal
+                                        .getTimerLeft();
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                window.location.href = "user/user_dashboard.php";
+                            }
+                        });
+                    } else if (response == "chief") {
+                        // Swal.fire({
+                        //     title: "Welcome chief",
+                        //     text: "Redirecting to chief dashboard...",
+                        //     icon: "success"
+                        // }).then(() => {
+                        //     window.location.href = "chief/chief_dashboard.php";
+                        // });
+                        Swal.fire({
+                            title: "Welcome chief",
+                            html: "Redirecting to chief dashboard...",
+                            timer: 500,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getHtmlContainer()
+                                    .querySelector("b");
+                                timerInterval = setInterval(() => {
+                                    timer.textContent = Swal
+                                        .getTimerLeft();
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                window.location.href = "chief/chief_dashboard.php";
+                            }
+                        });
+                    } else if (response == "leader") {
+                        // Swal.fire({
+                        //     title: "Welcome chief",
+                        //     text: "Redirecting to chief dashboard...",
+                        //     icon: "success"
+                        // }).then(() => {
+                        //     window.location.href = "chief/chief_dashboard.php";
+                        // });
+                        Swal.fire({
+                            title: "Welcome leader",
+                            html: "Redirecting to leader dashboard...",
+                            timer: 500,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getHtmlContainer()
+                                    .querySelector("b");
+                                timerInterval = setInterval(() => {
+                                    timer.textContent = Swal
+                                        .getTimerLeft();
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                window.location.href =
+                                    "leader/leader_dashboard.php";
+                            }
+                        });
+                    } else if (response == "manager" || response == "manager2") {
+
+                        Swal.fire({
+                            title: "Welcome manager",
+                            html: "Redirecting to manager dashboard...",
+                            timer: 500,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const timer = Swal.getHtmlContainer()
+                                    .querySelector("b");
+                                timerInterval = setInterval(() => {
+                                    timer.textContent = Swal
+                                        .getTimerLeft();
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                window.location.href =
+                                    "manager/manager_dashboard.php";
+                            }
+                        });
+                    } else if (response == "already_logged_in") {
+                        alert('มีการเข้าสู่ระบบอยู่แล้ว')
                     } else {
-                        alert("รหัสผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid Usercode or Password',
+                            text: 'Please try again.'
+                        });
                     }
                 },
                 error: function(xhr, status, error) {
-                    alert(
-                        "An error occurred while processing your request. Please try again later."
-                    );
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while processing your request. Please try again later.'
+                    });
                 }
             });
         });

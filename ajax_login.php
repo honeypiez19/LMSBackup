@@ -4,34 +4,42 @@ date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
 
 include 'connect.php';
 
-// $usercode = '6608418';
-// $password = '1234';
-
 $userCode = $_POST['userCode'];
 $passWord = $_POST['passWord'];
+$statusLog = 1;
 
-// สร้างคำสั่ง SQL เพื่อตรวจสอบ usercode และ password
-$sql = "SELECT * FROM employee_session WHERE Emp_usercode ='$userCode' AND Emp_password='$passWord'";
+$sql = "SELECT * FROM session WHERE s_usercode ='$userCode' AND s_password='$passWord' ";
 $result = $conn->query($sql);
 
 if ($result->rowCount() > 0) {
     // อัปเดตเวลาที่เข้าสู่ระบบ
     $loginTime = date('Y-m-d H:i:s');
-    $updateSql = "UPDATE employee_session SET Login_datetime = '$loginTime' WHERE Emp_usercode ='$userCode'";
+    $updateSql = "UPDATE session SET s_login_datetime = '$loginTime', s_log_status = '$statusLog' WHERE s_usercode ='$userCode'";
     $conn->query($updateSql);
 
     // กำหนด session สำหรับ usercode
-    $_SESSION['Emp_usercode'] = $userCode;
+    $_SESSION['s_usercode'] = $userCode;
 
     // ตรวจสอบระดับการเข้าใช้งาน (admin/user)
     $row = $result->fetch(PDO::FETCH_ASSOC);
-    if ($row['Emp_level'] == 'admin') {
+    if ($row['s_level'] == 'admin') {
         echo 'admin';
-    } elseif ($row['Emp_level'] == 'user') {
+    } elseif ($row['s_level'] == 'user') {
         echo 'user';
+    } elseif ($row['s_level'] == 'leader') {
+        echo 'leader';
+    } elseif ($row['s_level'] == 'chief') {
+        echo 'chief';
+    } elseif ($row['s_level'] == 'assisManager') {
+        echo 'assisManager';
+    } elseif ($row['s_level'] == 'manager') {
+        echo 'manager';
+    } elseif ($row['s_level'] == 'manager2') {
+        echo 'manager2';
     }
 } else {
     echo 'error';
 }
+// }
 
 $conn = null;

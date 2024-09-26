@@ -12,6 +12,13 @@
 
 @media (min-width: 769px) and (max-width: 1024px) {
   /* Styles for tablets */
+  .navbar-nav .nav-item .nav-link {
+    color: white;
+  }
+
+  .navbar-nav .nav-item.dropdown .dropdown-menu .dropdown-item {
+    color: black;
+  }
 }
 
 @media (min-width: 1025px) {
@@ -31,21 +38,6 @@ button[type="reset"],
 button[type="button"] {
   /* width: 120px; */
   border-radius: 50px;
-}
-
-/* Class */
-.login-container {
-  max-width: 400px;
-  margin: 250px auto;
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.login-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
 }
 
 .form-group {
@@ -111,6 +103,24 @@ button[type="button"] {
 
 .red-text {
   color: red;
+}
+
+/* ปุ่มตรวจสอบใน admin_employee_attendance เรียง อนุมัติ / ไม่อนุมัติ / ยกเลิก  */
+.my-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.my-actions .swal2-confirm {
+  order: 1;
+}
+
+.my-actions .swal2-cancel {
+  order: 2;
+}
+
+.my-actions .swal2-deny {
+  order: 3;
 }
 
 /* id --------------------------------------------------------------------- */
