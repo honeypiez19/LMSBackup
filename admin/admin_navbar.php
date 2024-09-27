@@ -20,7 +20,12 @@ if (isset($_SESSION['s_usercode'])) {
         $telPhone = $row['e_phone'];
         $depart = $row['e_department'];
         $level = $row['e_level'];
-
+        $workplace = $row['e_workplace'];
+        $subDepart = $row['e_sub_department'];
+        $subDepart2 = $row['e_sub_department2'];
+        $subDepart3 = $row['e_sub_department3'];
+        $subDepart4 = $row['e_sub_department4'];
+        $subDepart5 = $row['e_sub_department5'];
     }
 } else {
     $userName = "";
@@ -28,6 +33,12 @@ if (isset($_SESSION['s_usercode'])) {
     $telPhone = "";
     $depart = "";
     $level = "";
+    $workplace = "";
+    $subDepart = "";
+    $subDepart2 = "";
+    $subDepart3 = "";
+    $subDepart4 = "";
+    $subDepart5 = "";
 }
 
 // เมื่อมีการกดปุ่ม "ออกจากระบบ"
@@ -99,6 +110,17 @@ if (isset($_POST['logoutButton'])) {
                             <li><a class="dropdown-item" href="admin_employee.php">ข้อมูลพนักงาน</a></li>
                             <li><a class="dropdown-item" href="admin_employee_leave.php">การลาของพนักงาน</a></li>
                             <!-- <li><a class="dropdown-item" href="admin_employee_attendance.php">ข้อมูลการเข้างาน</a> -->
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false" style="color: white;">
+                            การลาและมาสายของฉัน
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="admin_user_dashboard.php">หน้าหลัก</a></li>
+                            <li><a class="dropdown-item" href="admin_user_leave.php">สถิติการลาและการมาสาย</a></li>
+                            <li><a class="dropdown-item" href="admin_user_history.php">ประวัติการลาและการมาสาย</a></li>
                         </ul>
                     </li>
                 </ul>

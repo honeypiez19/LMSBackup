@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($stmt->execute()) {
         if ($action === 'comfirm') {
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('manager')");
-            $stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+            // ส่งการแจ้งเตือนถึงผู้จัดการ
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_sub_department = 'Office' AND e_level = 'manager'");
             $stmt->execute();
             $managerResult = $stmt->fetch(PDO::FETCH_ASSOC);
             $managerToken = $managerResult['e_token'];
@@ -54,32 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sURL = 'https://lms.system-samt.com/';
             $sMessage = "$message \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
 
-            $chOne = curl_init();
-            curl_setopt_array($chOne, [
-                CURLOPT_URL => "https://notify-api.line.me/api/notify",
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_POST => 1,
-                CURLOPT_POSTFIELDS => http_build_query(["message" => $sMessage]),
-                CURLOPT_HTTPHEADER => ['Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $managerToken],
-                CURLOPT_RETURNTRANSFER => 1,
-            ]);
-            $managerResult = curl_exec($chOne);
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
-            }
-            curl_close($chOne);
-        } else {
-            // แจ้งเตือนไลน์ผู้จัดการ
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('manager')");
-            $stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
-            $stmt->execute();
-            $managerResult = $stmt->fetch(PDO::FETCH_ASSOC);
-            $managerToken = $managerResult['e_token'];
-
-            $sURL = 'https://lms.system-samt.com/';
-            $sMessage = "$message $name \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
-
+            // แจ้งเตือนผู้จัดการ
             $chOne = curl_init();
             curl_setopt_array($chOne, [
                 CURLOPT_URL => "https://notify-api.line.me/api/notify",
@@ -120,6 +95,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             curl_close($chTwo);
 
             echo "อัปเดตสถานะสำเร็จ";
+        } else {
+            // แจ้งเตือนไลน์ผู้จัดการ
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('manager')");
+            $stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+            $stmt->execute();
+            $managerResult = $stmt->fetch(PDO::FETCH_ASSOC);
+            $managerToken = $managerResult['e_token'];
+
+            $sURL = 'https://lms.system-samt.com/';
+            $sMessage = "$message $name \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
+
+            $chOne = curl_init();
+            curl_setopt_array($chOne, [
+                CURLOPT_URL => "https://notify-api.line.me/api/notify",
+                CURLOPT_SSL_VERIFYHOST => 0,
+                CURLOPT_SSL_VERIFYPEER => 0,
+                CURLOPT_POST => 1,
+                CURLOPT_POSTFIELDS => http_build_query(["message" => $sMessage]),
+                CURLOPT_HTTPHEADER => ['Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $managerToken],
+                CURLOPT_RETURNTRANSFER => 1,
+            ]);
+            $managerResult = curl_exec($chOne);
+            if (curl_error($chOne)) {
+                echo 'Error:' . curl_error($chOne);
+            }
+            curl_close($chOne);
+
         }
 
     } else {

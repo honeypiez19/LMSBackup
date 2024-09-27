@@ -80,7 +80,7 @@ $userCode = $_SESSION['s_usercode'];
                 <input type="text" class="form-control" id="codeSearch" list="codeList">
                 <datalist id="codeList">
                     <?php
-$sql = "SELECT * FROM employees WHERE e_usercode <> '999999' AND e_status <> '0' AND e_department = '$depart'";
+$sql = "SELECT * FROM employees WHERE e_status <> '1' AND e_department = 'Office'";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_usercode'] . '">';
@@ -93,7 +93,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                 <input type="text" class="form-control" id="nameSearch" list="nameList">
                 <datalist id="nameList">
                     <?php
-$sql = "SELECT * FROM employees WHERE e_usercode <> '999999' AND e_status <> '0' AND e_department = '$depart'";
+$sql = "SELECT * FROM employees WHERE e_status <> '1' AND e_department = 'Office'";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_name'] . '">';
@@ -106,7 +106,7 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                 <input type="text" class="form-control" id="depSearch" list="depList">
                 <datalist id="depList">
                     <?php
-$sql = "SELECT * FROM employees WHERE e_usercode <> '999999' AND e_status <> '0' AND e_department = '$depart'";
+$sql = "SELECT DISTINCT e_department FROM employees WHERE e_status <> '1' AND e_department = 'Office'";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_department'] . '">';
@@ -173,7 +173,8 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
             <!-- เนื้อหาของตาราง -->
             <tbody class="text-center my-table">
                 <?php
-$sql = "SELECT * FROM employees WHERE e_usercode <> '999999' AND e_status <> '0' AND e_department = '$depart' AND e_level <> 'manager'";
+$sql = "SELECT * FROM employees WHERE e_status <> '1'
+AND e_department = 'Office' AND e_level <> 'manager'";
 $result = $conn->query($sql);
 
 $rowNumber = 1;
@@ -214,22 +215,22 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
 
 SELECT
     SUM(CASE WHEN l_leave_id = '1' AND diff_days BETWEEN 0 AND 5 THEN calculate_time ELSE 0 END) AS leave_personal_count,
-    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode AND e_status <> '0') AS total_personal,
+    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode AND e_status <> '1') AS total_personal,
 
     SUM(CASE WHEN l_leave_id = '2' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS leave_personal_no_count,
-    (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode AND e_status <> '0') AS total_personal_no,
+    (SELECT e_leave_personal_no FROM employees WHERE e_usercode = :userCode AND e_status <> '1') AS total_personal_no,
 
     SUM(CASE WHEN l_leave_id = '3' AND diff_days BETWEEN 0 AND 30 THEN calculate_time ELSE 0 END) AS leave_sick_count,
-    (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode AND e_status <> '0') AS total_sick,
+    (SELECT e_leave_sick FROM employees WHERE e_usercode = :userCode AND e_status <> '1') AS total_sick,
 
     SUM(CASE WHEN l_leave_id = '4' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS leave_sick_work_count,
-    (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode AND e_status <> '0') AS total_leave_sick_work,
+    (SELECT e_leave_sick_work FROM employees WHERE e_usercode = :userCode AND e_status <> '1') AS total_leave_sick_work,
 
     SUM(CASE WHEN l_leave_id = '5' AND diff_days BETWEEN 0 AND 10 THEN calculate_time ELSE 0 END) AS leave_annual_count,
-    (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode AND e_status <> '0') AS total_annual,
+    (SELECT e_leave_annual FROM employees WHERE e_usercode = :userCode AND e_status <> '1') AS total_annual,
 
     SUM(CASE WHEN l_leave_id = '8' AND diff_days BETWEEN 0 AND 365 THEN calculate_time ELSE 0 END) AS other_count,
-    (SELECT e_other FROM employees WHERE e_usercode = :userCode AND e_status <> '0') AS total_other,
+    (SELECT e_other FROM employees WHERE e_usercode = :userCode AND e_status <> '1') AS total_other,
 
     SUM(CASE WHEN l_leave_id = '7' THEN 1 ELSE 0 END) AS late_count
     FROM leave_chk

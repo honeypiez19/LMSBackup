@@ -14,6 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $endTime = $_POST['endTime'];
     $addName = $_POST['addName'];
     $addDate = date('Y-m-d H:i:s');
+    $workplace = $_POST['workplace'];
+    $subDepart = $_POST['subDepart'];
 
     $startDate = $_POST['startDate'];
     $startDate = date('Y-m-d', strtotime($startDate));
@@ -28,6 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $proveStatus2 = 1;
     $proveStatus3 = 6;
 
+    // $workplace = $_POST['workplace'];
+    // $subDepart = $_POST['subDepart'];
+    // $subDepart2 = $_POST['subDepart2'];
+    // $subDepart3 = $_POST['subDepart3'];
+    // $subDepart4 = $_POST['subDepart4'];
+    // $subDepart5 = $_POST['subDepart5'];
     // $levelMapping = [
     //     1 => 'user',
     //     2 => 'chief',
@@ -353,7 +361,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "Error: ไม่สามารถบันทึกข้อมูลได้";
         }
 
-    } elseif ($level == 'user') {
+    } else if ($level == 'user') {
         // Retrieve the count of late entries for the user
         $stmt = $conn->prepare("SELECT COUNT(*) FROM leave_list WHERE l_usercode = :userCode AND l_leave_id = :leaveType");
         $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
@@ -374,6 +382,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             l_name,
             l_department,
             l_level,
+            l_workplace,
             l_phone,
             l_leave_id,
             l_leave_reason,
@@ -394,6 +403,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             :name,
             :department,
             :level,
+            :workplace,
             :telPhone,
             :leaveType,
             :reason,
@@ -416,6 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bindParam(':name', $name, PDO::PARAM_STR);
         $stmt->bindParam(':department', $department, PDO::PARAM_STR);
         $stmt->bindParam(':level', $level, PDO::PARAM_STR);
+        $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
         $stmt->bindParam(':telPhone', $telPhone, PDO::PARAM_STR);
         $stmt->bindParam(':leaveType', $leaveType, PDO::PARAM_INT);
         $stmt->bindParam(':reason', $reason, PDO::PARAM_STR);
@@ -442,6 +453,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     l_name,
                     l_department,
                     l_level,
+                    l_workplace,
                     l_phone,
                     l_leave_id,
                     l_leave_reason,
@@ -462,6 +474,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     :name,
                     :department,
                     :level,
+                    :workplace,
                     :telPhone,
                     6, -- Set leaveType to 6
                     :reason,
@@ -484,6 +497,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bindParam(':name', $name, PDO::PARAM_STR);
                 $stmt->bindParam(':department', $department, PDO::PARAM_STR);
                 $stmt->bindParam(':level', $level, PDO::PARAM_STR);
+                $stmt->bindParam(':workplace', $workplace, PDO::PARAM_STR);
                 $stmt->bindParam(':telPhone', $telPhone, PDO::PARAM_STR);
                 $stmt->bindParam(':reason', $reason, PDO::PARAM_STR);
                 $stmt->bindParam(':startDate', $startDate, PDO::PARAM_STR);
@@ -505,48 +519,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $supervisorURL = 'https://lms.system-samt.com/';
             $supervisorMessage = "$name มาสาย\nวันที่มาสาย : $startDate\nเวลาที่มาสาย : $startTime ถึง $endTime\nสถานะรายการ : ปกติ\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $supervisorURL";
 
-            // Fetch tokens for chiefs and managers in the same department
-            $stmtDept = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :department AND e_level IN ('chief', 'manager')");
-            $stmtDept->bindParam(':department', $department, PDO::PARAM_STR);
+            // Retrieve supervisor token
+            $stmtDept = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = 'Store'");
+            $stmtDept->bindParam(':workplace', $workplace, PDO::PARAM_STR);
+            // $stmtDept->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
             $stmtDept->execute();
             $supervisorTokens = $stmtDept->fetchAll(PDO::FETCH_COLUMN);
 
-            // Loop through tokens to send notifications
-            foreach ($supervisorTokens as $supervisorToken) {
-                $chSupervisor = curl_init();
-                curl_setopt($chSupervisor, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-                curl_setopt($chSupervisor, CURLOPT_SSL_VERIFYHOST, 0);
-                curl_setopt($chSupervisor, CURLOPT_SSL_VERIFYPEER, 0);
-                curl_setopt($chSupervisor, CURLOPT_POST, 1);
-                curl_setopt($chSupervisor, CURLOPT_POSTFIELDS, "message=" . urlencode($supervisorMessage));
-                $headersSupervisor = [
-                    'Content-type: application/x-www-form-urlencoded',
-                    'Authorization: Bearer ' . $supervisorToken,
-                ];
-                curl_setopt($chSupervisor, CURLOPT_HTTPHEADER, $headersSupervisor);
-                curl_setopt($chSupervisor, CURLOPT_RETURNTRANSFER, 1);
-                $resultSupervisor = curl_exec($chSupervisor);
+            if (!empty($supervisorTokens)) {
+                // Loop through tokens to send notifications
+                foreach ($supervisorTokens as $supervisorToken) {
+                    $chSupervisor = curl_init();
+                    curl_setopt($chSupervisor, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                    curl_setopt($chSupervisor, CURLOPT_SSL_VERIFYHOST, 0);
+                    curl_setopt($chSupervisor, CURLOPT_SSL_VERIFYPEER, 0);
+                    curl_setopt($chSupervisor, CURLOPT_POST, 1);
+                    curl_setopt($chSupervisor, CURLOPT_POSTFIELDS, "message=" . urlencode($supervisorMessage));
+                    curl_setopt($chSupervisor, CURLOPT_HTTPHEADER, [
+                        'Content-type: application/x-www-form-urlencoded',
+                        'Authorization: Bearer ' . $supervisorToken,
+                    ]);
+                    curl_setopt($chSupervisor, CURLOPT_RETURNTRANSFER, 1);
+                    $resultSupervisor = curl_exec($chSupervisor);
 
-                // Check for errors
-                if (curl_error($chSupervisor)) {
-                    echo 'Error:' . curl_error($chSupervisor);
-                } else {
-                    $resultSupervisor_ = json_decode($resultSupervisor, true);
-                    echo "status : " . $resultSupervisor_['status'];
-                    echo "message : " . $resultSupervisor_['message'];
+                    // Check for errors
+                    if (curl_error($chSupervisor)) {
+                        echo 'Error:' . curl_error($chSupervisor);
+                    } else {
+                        $resultSupervisor_ = json_decode($resultSupervisor, true);
+                        echo "status : " . $resultSupervisor_['status'];
+                        echo "message : " . $resultSupervisor_['message'];
+                    }
+
+                    curl_close($chSupervisor);
                 }
 
-                curl_close($chSupervisor);
+                echo "บันทึกข้อมูลการมาสายและแจ้งเตือนหัวหน้ากับผู้จัดการเรียบร้อยแล้ว";
+            } else {
+                echo "Error: ไม่พบข้อมูลการแจ้งเตือน";
             }
-
-            echo "บันทึกข้อมูลการมาสายและแจ้งเตือนหัวหน้ากับผู้จัดการเรียบร้อยแล้ว";
         } else {
             echo "Error: ไม่สามารถบันทึกข้อมูลได้";
         }
     } else {
         echo 'ไม่พบสถานะ';
     }
-    // Execute the statement
+
 } else {
     echo "Error: Invalid request method";
 }

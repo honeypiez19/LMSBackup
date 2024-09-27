@@ -78,11 +78,14 @@ $userCode = $_SESSION['s_usercode'];
                                     required>
                                 <datalist id="codeList">
                                     <?php
-$sql = "SELECT * FROM employees WHERE e_usercode <> '999999' AND e_status <> '0'";
+$sql = "SELECT * FROM employees WHERE e_level <> 'admin' AND e_status <> 1";
 $result = $conn->query($sql);
 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
     echo '<option value="' . $row['e_usercode'] . '" data-name="' . $row['e_name'] . '" data-username="' . $row['e_username'] . '" data-depart="' .
-        $row['e_department'] . '" data-level="' . $row['e_level'] . '" data-telPhone="' . $row['e_phone'] . '">';
+        $row['e_department'] . '" data-level="' . $row['e_level'] . '" data-telPhone="' . $row['e_phone'] . '" data-sub-department="' . $row['e_sub_department'] . '"
+    data-sub-department2="' . $row['e_sub_department2'] . '" data-sub-department3="' . $row['e_sub_department3'] . '" data-sub-department4="' .
+        $row['e_sub_department4'] . '" data-sub-department5="' . $row['e_sub_department5'] . '" data-workplace="' . $row['e_workplace'] . '" >';
+
 }
 ?>
                                 </datalist>
@@ -91,11 +94,18 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                                 <input type="text" class="form-control" id="level" name="level" hidden>
                                 <input type="text" class="form-control" id="telPhone" name="telPhone" hidden>
                                 <input type="text" class="form-control" id="reason" name="reason" value="มาสาย" hidden>
+                                <input type="text" class="form-control" id="workplace" name="workplace" hidden>
+                                <input type="text" class="form-control" id="subDeart" name="subDeart" hidden>
+                                <input type="text" class="form-control" id="subDeart2" name="subDeart2" hidden>
+                                <input type="text" class="form-control" id="subDeart3" name="subDeart3" hidden>
+                                <input type="text" class="form-control" id="subDeart4" name="subDeart4" hidden>
+                                <input type="text" class="form-control" id="subDeart5" name="subDeart5" hidden>
+
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="mt-3">
-                                <label for="employeeCode" class="form-label">ชื่อพนักงาน</label>
+                                <label for="employeeName" class="form-label">ชื่อพนักงาน</label>
                                 <input type="text" class="form-control" id="name" name="name" disabled>
                             </div>
                         </div>
@@ -891,6 +901,7 @@ if (count($currentResults) > 0) {
 
         // 6
         echo '<td><button type="button" class="btn btn-primary btn-open-modal" data-toggle="modal" data-target="#employeeModal" data-usercode="' . $row['l_usercode'] . '"><i class="fa-solid fa-magnifying-glass"></i></button></td>';
+
         echo '</tr>';
     }
     echo '</tbody>';
@@ -973,6 +984,12 @@ if (count($currentResults) > 0) {
             const reason = $('#reason').val();
             const startDate = $('#startDate').val();
             const endDate = $('#endDate').val();
+            const workplace = $('#workplace').val();
+            const subDepart = $('#subDepart').val();
+            // const subDeart2 = $('#subDeart2').val();
+            // const subDeart3 = $('#subDeart3').val();
+            // const subDeart4 = $('#subDeart4').val();
+            // const subDeart5 = $('#subDeart5').val();
 
 
             var addName = '<?php echo $userName; ?>';
@@ -990,6 +1007,13 @@ if (count($currentResults) > 0) {
             formData.append('reason', reason);
             formData.append('startDate', startDate);
             formData.append('endDate', endDate);
+            formData.append('workplace', workplace);
+            formData.append('subDepart', subDepart);
+            // formData.append('subDepart2', subDepart2);
+            // formData.append('subDepart3', subDepart3);
+            // formData.append('subDepart4', subDepart4);
+            // formData.append('subDepart5', subDepart5);
+
 
             $.ajax({
                 url: 'a_ajax_add_late_time.php',
@@ -1044,7 +1068,6 @@ if (count($currentResults) > 0) {
             var name = $(rowData[6]).text();
             var leaveStatus = $(rowData[9]).text();
 
-            // alert(lateDate + lateStart + lateEnd + department)
             $('.chkLatebtn').off('click');
             Swal.fire({
                 title: "ต้องการอนุมัติการมาสายหรือไม่?",
@@ -1229,6 +1252,13 @@ if (count($currentResults) > 0) {
                 document.getElementById('department').value = dataList[i].getAttribute('data-depart');
                 document.getElementById('level').value = dataList[i].getAttribute('data-level');
                 document.getElementById('telPhone').value = dataList[i].getAttribute('data-telPhone');
+                document.getElementById('workplace').value = dataList[i].getAttribute('data-workplace');
+                document.getElementById('subDeart').value = dataList[i].getAttribute('data-sub-department');
+                document.getElementById('subDeart2').value = dataList[i].getAttribute('data-sub-department2');
+                document.getElementById('subDeart3').value = dataList[i].getAttribute('data-sub-department3');
+                document.getElementById('subDeart4').value = dataList[i].getAttribute('data-sub-department4');
+                document.getElementById('subDeart5').value = dataList[i].getAttribute('data-sub-department5');
+
                 break;
             }
         }
@@ -1241,6 +1271,12 @@ if (count($currentResults) > 0) {
             document.getElementById('department').value = '';
             document.getElementById('level').value = '';
             document.getElementById('telPhone').value = '';
+            document.getElementById('workplace').value = '';
+            document.getElementById('subDeart').value = '';
+            document.getElementById('subDeart2').value = '';
+            document.getElementById('subDeart3').value = '';
+            document.getElementById('subDeart4').value = '';
+            document.getElementById('subDeart5').value = '';
         }
     });
 
@@ -1251,6 +1287,12 @@ if (count($currentResults) > 0) {
             document.getElementById('department').value = '';
             document.getElementById('level').value = '';
             document.getElementById('telPhone').value = '';
+            document.getElementById('workplace').value = '';
+            document.getElementById('subDeart').value = '';
+            document.getElementById('subDeart2').value = '';
+            document.getElementById('subDeart3').value = '';
+            document.getElementById('subDeart4').value = '';
+            document.getElementById('subDeart5').value = '';
         }
     });
     $(function() {

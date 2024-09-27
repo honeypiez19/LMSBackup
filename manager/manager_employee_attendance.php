@@ -142,7 +142,7 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 AND l_department = '$depart' AND Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear ORDER BY l_create_datetime DESC";
+$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 AND l_department = 'Office' AND Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear ORDER BY l_create_datetime DESC";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 

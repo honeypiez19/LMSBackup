@@ -88,6 +88,7 @@ AND l_approve_status = 2
 AND l_level IN ('user','chief')
 AND l_approve_status2 = 1
 AND (l_leave_id <> 6 AND l_leave_id <> 7)
+AND l_leave_status = 0
 GROUP BY l_name";
 $stmt_check_leave = $conn->prepare($sql_check_leave);
 $stmt_check_leave->bindParam(':depart', $depart);
@@ -112,12 +113,13 @@ if (!empty($employee_list)) {
 // พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
 $sql_cancel_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
 FROM leave_list
-WHERE l_department = :depart
-AND l_leave_status = 1
--- AND l_approve_status = 0
+WHERE
+l_department = 'Office'
+AND l_approve_status = 2
 AND l_level IN ('user','chief')
-AND l_approve_status2 = 4
--- AND (l_leave_id <> 6 AND l_leave_id <> 7)
+AND l_approve_status2 = 1
+AND (l_leave_id <> 6 AND l_leave_id <> 7)
+AND l_leave_status = 1
 GROUP BY l_name";
 $stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
 $stmt_cancel_leave->bindParam(':depart', $depart);
@@ -142,10 +144,9 @@ if (!empty($employee_list)) {
 // มีพนักงานมาสาย --------------------------------------------------------------------------------------------
 $sql_check_leave_id_7 = "SELECT COUNT(l_list_id) AS leave_count, l_name
 FROM leave_list
-WHERE l_department = :depart
+WHERE l_department = 'Office'
 AND l_leave_id = 7
-AND l_level IN ('user', 'chief')
-AND l_approve_status = 0
+AND l_approve_status = 2
 OR  l_approve_status = 6
 AND l_approve_status2 = 1
 GROUP BY l_name";

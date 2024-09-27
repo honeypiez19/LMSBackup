@@ -552,12 +552,13 @@ echo '</div>';
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
+            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
             var depart = $(rowData[2]).text(); // แผนก
             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
             var checkFirm = '1'; // ผ่าน
-
 
             var userName = '<?php echo $userName; ?>';
 
@@ -574,7 +575,10 @@ echo '</div>';
                     leaveStartDate: leaveStartDate,
                     leaveEndDate: leaveEndDate,
                     depart: depart,
-                    checkFirm: checkFirm
+                    checkFirm: checkFirm,
+                    empName: empName,
+                    leaveStatus: leaveStatus
+
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -589,10 +593,12 @@ echo '</div>';
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
+            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
             var depart = $(rowData[2]).text(); // แผนก
             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
             var checkFirm = '2'; // ไม่ผ่าน
             var userName = '<?php echo $userName; ?>';
@@ -609,7 +615,10 @@ echo '</div>';
                     leaveStartDate: leaveStartDate,
                     leaveEndDate: leaveEndDate,
                     depart: depart,
-                    checkFirm: checkFirm
+                    checkFirm: checkFirm,
+                    empName: empName,
+                    leaveStatus: leaveStatus
+
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -965,7 +974,7 @@ echo '</div>';
                         $('.modal-footer .btn-success').off('click').on('click',
                             function() {
                                 var leaveType = $(rowData[0]).text(); // ประเภทการลา
-                                var name = $(rowData[1]).text(); // ชื่อพนักงาน
+                                var empName = $(rowData[1]).text(); // ชื่อพนักงาน
                                 var depart = $(rowData[2]).text(); // แผนก
                                 var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                                 var userCode = $(rowData[5]).text(); // รหัสพนักงาน
@@ -974,6 +983,7 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาเริ่มต้น
                                 var leaveEndDate = $(rowData[10])
                                     .text(); // วันเวลาที่ลาสิ้นสุด
+                                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                                 var checkFirm = '1'; // ผ่าน
                                 var userName = '<?php echo $userName; ?>';
@@ -983,7 +993,7 @@ echo '</div>';
                                     method: 'POST',
                                     data: {
                                         leaveType: leaveType,
-                                        name: name,
+                                        empName: empName,
                                         depart: depart,
                                         leaveReason: leaveReason,
                                         userCode: userCode,
@@ -991,7 +1001,9 @@ echo '</div>';
                                         leaveStartDate: leaveStartDate,
                                         leaveEndDate: leaveEndDate,
                                         checkFirm: checkFirm,
-                                        userName: userName
+                                        userName: userName,
+                                        empName: empName,
+                                        leaveStatus: leaveStatus
                                         // name: name,
                                         // createDate: createDate,
                                         // userCode: userCode,
@@ -1015,7 +1027,7 @@ echo '</div>';
                             });
                         $('.modal-footer .btn-danger').off('click').on('click', function() {
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
-                            var name = $(rowData[1]).text(); // ชื่อพนักงาน
+                            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
                             var depart = $(rowData[2]).text(); // แผนก
                             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
@@ -1024,6 +1036,7 @@ echo '</div>';
                                 .text(); // วันเวลาที่ลาเริ่มต้น
                             var leaveEndDate = $(rowData[10])
                                 .text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                             var checkFirm = '2'; // ไม่ผ่าน
                             var userName = '<?php echo $userName; ?>';
@@ -1044,7 +1057,7 @@ echo '</div>';
                                 method: 'POST',
                                 data: {
                                     leaveType: leaveType,
-                                    name: name,
+                                    empName: empName,
                                     depart: depart,
                                     leaveReason: leaveReason,
                                     userCode: userCode,
@@ -1052,7 +1065,9 @@ echo '</div>';
                                     leaveStartDate: leaveStartDate,
                                     leaveEndDate: leaveEndDate,
                                     checkFirm: checkFirm,
-                                    userName: userName
+                                    userName: userName,
+                                    empName: empName,
+                                    leaveStatus: leaveStatus
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide');

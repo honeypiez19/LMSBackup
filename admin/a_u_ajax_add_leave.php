@@ -126,6 +126,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->bindParam(':workplace', $workplace);
                 $stmt->bindParam(':subDepart', $subDepart);
             }
+            // เฉพาะ HR
+            else if ($subDepart == 'All') {
+                // แจ้งเตือนพี่เก๋
+                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :subDepart");
+                $stmt->bindParam(':workplace', $workplace);
+                $stmt->bindParam(':subDepart', $subDepart);
+            }
         } else if ($depart == 'CAD1') {
             $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'leader' AND e_sub_department = :subDepart");
             $stmt->bindParam(':workplace', $workplace);

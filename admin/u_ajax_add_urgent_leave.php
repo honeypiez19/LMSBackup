@@ -13,11 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $level = $_POST['level'];
     $workplace = $_POST['workplace'];
 
-    $subDepart = $_POST['subDepart'];
-    $subDepart2 = $_POST['subDepart2'];
-    $subDepart3 = $_POST['subDepart3'];
-    $subDepart4 = $_POST['subDepart4'];
-    $subDepart5 = $_POST['subDepart5'];
     $urgentLeaveType = $_POST['urgentLeaveType'];
     $urgentLeaveReason = $_POST['urgentLeaveReason'];
 
