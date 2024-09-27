@@ -129,7 +129,7 @@ em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_lis
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
 AND li.l_leave_id <> 6
 AND li.l_leave_id <> 7
-AND li.l_approve_status = 2";
+-- AND li.l_approve_status = 2";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -156,7 +156,6 @@ em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_lis
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
 AND li.l_leave_id <> 6
 AND li.l_leave_id <> 7
-AND li.l_approve_status = 2
 AND li.l_approve_status2 = 1";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
@@ -183,7 +182,6 @@ em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_lis
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
 AND li.l_leave_id <> 6
 AND li.l_leave_id <> 7
-AND li.l_approve_status = 2
 AND li.l_approve_status2 = 4";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
@@ -210,7 +208,6 @@ em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_lis
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
 AND li.l_leave_id <> 6
 AND li.l_leave_id <> 7
-AND li.l_approve_status = 2
 AND li.l_approve_status2 = 5";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
