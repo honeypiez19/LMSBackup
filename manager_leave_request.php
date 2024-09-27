@@ -124,12 +124,12 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth' 
-AND l_department = 'Office' 
--- AND l_level IN ('user','chief')
-AND l_approve_status2 = 1
-AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
+AND li.l_leave_id <> 6
+AND li.l_leave_id <> 7
+-- AND li.l_approve_status = 2";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -156,7 +156,7 @@ em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_lis
 INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
 AND li.l_leave_id <> 6
 AND li.l_leave_id <> 7
-AND li.l_approve_status = 2";
+AND li.l_approve_status2 = 1";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -177,8 +177,12 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level IN ('user','chief') AND l_approve_status2 = 4 AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
+AND li.l_leave_id <> 6
+AND li.l_leave_id <> 7
+AND li.l_approve_status2 = 4";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -199,8 +203,12 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level IN ('user','chief') AND l_approve_status2 = 5 AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_department = 'Office'
+AND li.l_leave_id <> 6
+AND li.l_leave_id <> 7
+AND li.l_approve_status2 = 5";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -261,13 +269,8 @@ if (!isset($_GET['page'])) {
 }
 
 $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office' 
-AND l_approve_status = 2
-OR l_approve_status = 3
+AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
-
-// $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '2024' AND Month(l_create_datetime) = '07' AND l_department = 'RD' AND l_level IN ('user','chief') AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
-// $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level <> 'chief' AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -662,6 +665,7 @@ echo '</div>';
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
+            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
             var depart = $(rowData[2]).text(); // แผนก
             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
@@ -685,7 +689,9 @@ echo '</div>';
                     leaveReason: leaveReason,
                     leaveStartDate: leaveStartDate,
                     leaveEndDate: leaveEndDate,
-                    depart: depart
+                    depart: depart,
+                    empName: empName,
+                    leaveStatus: leaveStatus
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -706,6 +712,8 @@ echo '</div>';
             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
+            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
 
             var status = '5'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
@@ -724,7 +732,9 @@ echo '</div>';
                     leaveReason: leaveReason,
                     leaveStartDate: leaveStartDate,
                     leaveEndDate: leaveEndDate,
-                    depart: depart
+                    depart: depart,
+                    empName: empName,
+                    leaveStatus: leaveStatus
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -1093,6 +1103,7 @@ echo '</div>';
                                 var createDate = $(rowData[7])
                                     .text(); // วันที่ยื่นใบลา
                                 var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                                var empName = $(rowData[1]).text(); // ชื่อพนักงาน
                                 var depart = $(rowData[2]).text(); // แผนก
                                 var leaveReason = $(rowData[3])
                                     .text(); // เหตุผลการลา
@@ -1100,6 +1111,7 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาเริ่มต้น
                                 var leaveEndDate = $(rowData[10])
                                     .text(); // วันเวลาที่ลาสิ้นสุด
+                                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
@@ -1118,7 +1130,10 @@ echo '</div>';
                                         leaveReason: leaveReason,
                                         leaveStartDate: leaveStartDate,
                                         leaveEndDate: leaveEndDate,
-                                        depart: depart
+                                        depart: depart,
+                                        leaveStatus: leaveStatus,
+                                        empName: empName
+
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
@@ -1134,12 +1149,14 @@ echo '</div>';
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
                             var depart = $(rowData[2]).text(); // แผนก
                             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
                             var leaveEndDate = $(rowData[10])
                                 .text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                             var status = '5'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
@@ -1158,7 +1175,9 @@ echo '</div>';
                                     leaveReason: leaveReason,
                                     leaveStartDate: leaveStartDate,
                                     leaveEndDate: leaveEndDate,
-                                    depart: depart
+                                    depart: depart,
+                                    leaveStatus: leaveStatus,
+                                    empName: empName
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide');
