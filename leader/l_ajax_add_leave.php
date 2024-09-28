@@ -175,10 +175,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         } else if ($level == 'leader') {
             if ($depart == 'Office') {
+                // แจ้งเตือนไปที่พี่ตุ๊ก
                 $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
                 $stmt->bindParam(':workplace', $workplace);
-            } else {
-                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'All'");
+            }
+        } else if ($level == 'chief') {
+            if ($depart == 'Management') {
+                // แจ้งเตือนไปที่พี่ตุ๊ก
+                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
                 $stmt->bindParam(':workplace', $workplace);
             }
         } else {

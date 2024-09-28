@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $leaveStatus = $_POST['leaveStatus'];
     $action = $_POST['action'];
     $comfirmName = $_POST['comfirmName'];
+    $level = $_POST['level'];
 
     $proveDate = date('Y-m-d H:i:s');
 

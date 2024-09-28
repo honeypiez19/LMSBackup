@@ -17,6 +17,13 @@ $createDatetime = $_POST['createDatetime'];
 $canDatetime = date('Y-m-d H:i:s');
 $proveDate = date('Y-m-d H:i:s');
 
+$workplace = $_POST['workplace'];
+$subDepart = $_POST['subDepart'];
+$subDepart2 = $_POST['subDepart2'];
+$subDepart3 = $_POST['subDepart3'];
+$subDepart4 = $_POST['subDepart4'];
+$subDepart5 = $_POST['subDepart5'];
+
 $sqlReturn = "UPDATE leave_list SET
                 l_leave_status = 1,
                 l_cancel_datetime = :canDatetime,

@@ -1966,6 +1966,7 @@ echo '</div>';
             var userCode = $(this).data('usercode');
             var userName = "<?php echo $userName ?>";
             var comfirmName = "<?php echo $name ?>";
+            var workplace = "<?php echo $workplace ?>";
             // var leaveType = $(rowData[0]).text();
             var depart = $(rowData[1]).text();
             var lateDate = $(rowData[3]).text();
@@ -1997,6 +1998,7 @@ echo '</div>';
                             userCode: userCode,
                             comfirmName: comfirmName,
                             leaveStatus: leaveStatus,
+                            workplace: workplace,
                             action: 'comfirm'
                         },
                         success: function(response) {

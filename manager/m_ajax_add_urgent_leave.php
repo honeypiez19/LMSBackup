@@ -95,12 +95,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // แจ้งเตือนไลน์ HR
         // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'admin'");
         if ($depart == 'RD') {
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_workplace = :workplace AND e_level = 'admin'");
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
 
         } else {
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_workplace = :workplace AND e_level = 'admin'");
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_workplace = :workplace AND e_level = 'admin'");
         }
-        $stmt->bindParam(':depart', $depart);
+        // $stmt->bindParam(':depart', $depart);
         $stmt->bindParam(':workplace', $workplace);
         $stmt->execute();
         $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);

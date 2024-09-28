@@ -6,6 +6,7 @@ date_default_timezone_set('Asia/Bangkok');
 $usercode = $_POST['usercode'];
 $userName = $_POST['userName'];
 $name = $_POST['name'];
+$level = $_POST['level'];
 $depart = $_POST['depart'];
 $leaveID = $_POST['leaveId'];
 $leaveType = $_POST['leaveType'];
@@ -16,6 +17,13 @@ $leaveStatus = $_POST['leaveStatus'];
 $createDatetime = $_POST['createDatetime'];
 $canDatetime = date('Y-m-d H:i:s');
 $proveDate = date('Y-m-d H:i:s');
+
+$workplace = $_POST['workplace'];
+$subDepart = $_POST['subDepart'];
+$subDepart2 = $_POST['subDepart2'];
+$subDepart3 = $_POST['subDepart3'];
+$subDepart4 = $_POST['subDepart4'];
+$subDepart5 = $_POST['subDepart5'];
 
 $sqlReturn = "UPDATE leave_list SET
                 l_leave_status = 1,
@@ -45,8 +53,31 @@ if ($stmtReturn->execute()) {
     $sMessage = "$name ยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $startDate ถึง $endDate\nสถานะใบลา : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
     // แจ้งเตือนไลน์ ผจก ในแผนก
-    $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level = 'manager'");
-    $stmt->bindParam(':depart', $depart);
+    if ($depart == 'RD') {
+        // แจ้งไลน์โฮซัง
+        $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
+        // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
+        // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
+        $stmt->bindParam(':workplace', $workplace);
+        // $stmt->bindParam(':depart', $depart);
+
+    } else if ($level == 'leader') {
+        if ($depart == 'Office') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+            $stmt->bindParam(':workplace', $workplace);
+        }
+    } else if ($level == 'chief') {
+        if ($depart == 'Management') {
+            $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+            $stmt->bindParam(':workplace', $workplace);
+        }
+    } else {
+        echo "ไม่พบเงื่อนไข";
+        // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_workplace = :workplace AND e_level IN ('chief', 'manager')");
+        // $stmt->bindParam(':depart', $depart);
+        // $stmt->bindParam(':workplace', $workplace);
+    }
+
     $stmt->execute();
     $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 

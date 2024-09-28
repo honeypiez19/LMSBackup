@@ -1923,6 +1923,7 @@ echo '</div>';
             var createDatetime = $(this).closest('tr').find('td:eq(7)').text();
             var usercode = $(this).data('usercode');
             var userName = "<?php echo $userName ?>";
+            var level = "<?php echo $level ?>";
             var name = "<?php echo $name ?>";
             var leaveType = $(rowData[0]).text();
             var depart = $(rowData[1]).text();
@@ -1930,8 +1931,14 @@ echo '</div>';
             var startDate = $(rowData[9]).text();
             var endDate = $(rowData[10]).text();
             var leaveStatus = 'ยกเลิก';
+            var workplace = "<?php echo $workplace ?>";
+            var subDepart = "<?php echo $subDepart ?>";
+            var subDepart2 = "<?php echo $subDepart2 ?>";
+            var subDepart3 = "<?php echo $subDepart3 ?>";
+            var subDepart4 = "<?php echo $subDepart4 ?>";
+            var subDepart5 = "<?php echo $subDepart5 ?>";
 
-            alert(startDate)
+            // alert(startDate)
             Swal.fire({
                 title: "ต้องการยกเลิกรายการ ?",
                 icon: "question",
@@ -1956,7 +1963,14 @@ echo '</div>';
                             leaveReason: leaveReason,
                             startDate: startDate,
                             endDate: endDate,
-                            leaveStatus: leaveStatus
+                            leaveStatus: leaveStatus,
+                            workplace: workplace,
+                            subDepart: subDepart,
+                            subDepart2: subDepart2,
+                            subDepart3: subDepart3,
+                            subDepart4: subDepart4,
+                            subDepart5: subDepart5,
+                            level: level
                         },
                         success: function(response) {
                             Swal.fire({
