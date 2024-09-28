@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Sep 26, 2024 at 05:32 PM
+-- Generation Time: Sep 28, 2024 at 04:34 PM
 -- Server version: 10.3.38-MariaDB-0ubuntu0.20.04.1
 -- PHP Version: 7.4.3-4ubuntu2.19
 
@@ -135,7 +135,7 @@ INSERT INTO `employees` (`e_id`, `e_usercode`, `e_username`, `e_password`, `e_na
 (37, '5111178', 'Yongwit', '5111178', 'Yongwit Chasanthia', 'CAD1', 'Design', NULL, NULL, NULL, NULL, '2008-11-17', '15.1', 'user', 'Bang Phli', NULL, '', '087-2031600', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', '', '', '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, ''),
 (38, '5303180', 'Pongsak', '5303180', 'Pongsak Yodkhammee', 'CAD2', 'Modeling', NULL, NULL, NULL, NULL, '2010-03-01', '14.6', 'user', 'Bang Phli', NULL, '', '084-7717035', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', '', '', '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, ''),
 (39, '5303181', 'Thanu', '5303181', 'Thanu Kunying', 'CAD1', 'Design', NULL, NULL, NULL, NULL, '2010-03-16', '14.6', 'user', 'Bang Phli', NULL, '', '086-6358615', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', '', '', '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, ''),
-(40, '5303183', 'Natnicha', '5303183', 'Natnicha Maneechot', 'Office', 'All', NULL, NULL, NULL, NULL, '2010-03-16', '14.6', 'admin', 'Bang Phli', NULL, '', '085-2062793', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', '', '', '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, ''),
+(40, '5303183', 'Natnicha', '5303183', 'Natnicha Maneechot', 'Office', 'All', NULL, NULL, NULL, NULL, '2010-03-16', '14.6', 'admin', 'Bang Phli', NULL, NULL, '085-2062793', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', NULL, NULL, '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, NULL),
 (41, '5307186', 'Jeerasak', '5307186', 'Jeerasak Chaydam', 'CAM', '', NULL, NULL, NULL, NULL, '2010-07-01', '14.2', 'user', 'Bang Phli', NULL, '', '084-5598845', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', '', '', '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, ''),
 (42, '5311196', 'Tussanee', '5311196', 'Tussanee Soparut', 'Office', 'Store', NULL, NULL, NULL, NULL, '2010-11-22', '13.1', 'user', 'Bang Phli', NULL, '', '081-3005389', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', '', '', '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, ''),
 (43, '5505228', 'Wasitporn', '5505228', 'Wasitporn Nuekthuek', 'Management', 'Sales', NULL, NULL, NULL, NULL, '2012-05-02', '12.4', 'chief', 'Bang Phli', NULL, '', '085-0440790', '0', 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6', '5', '365', '30', '365', '10', '', '', '365', '2023-09-24 14:31:00', 'Kanyapa', NULL, ''),
@@ -320,10 +320,13 @@ CREATE TABLE `leave_list` (
 --
 
 INSERT INTO `leave_list` (`l_list_id`, `l_usercode`, `l_username`, `l_name`, `l_department`, `l_level`, `l_workplace`, `l_phone`, `l_leave_id`, `l_leave_reason`, `l_leave_start_date`, `l_leave_start_time`, `l_leave_end_date`, `l_leave_end_time`, `l_leave_status`, `l_create_datetime`, `l_cancel_datetime`, `l_late_datetime`, `l_file`, `l_remark`, `l_approve_status`, `l_approve_name`, `l_approve_datetime`, `l_reason`, `l_approve_status2`, `l_approve_name2`, `l_approve_datetime2`, `l_reason2`, `l_hr_status`, `l_hr_name`, `l_hr_datetime`, `l_hr_reason`, `l_hr_create_name`, `l_hr_create_datetime`, `l_hr_cancel_name`, `l_hr_cancel_datetime`) VALUES
-(199, '5006160', 'Manachai', 'Manachai Lapootama', 'CAD1', 'user', 'Bang Phli', '085-1501836', 1, 'กิจส่วนตัว', '2024-09-26', '08:00:00', '2024-09-27', '16:40:00', '0', '2024-09-26 16:04:24', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, '1', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(200, '5006160', 'Manachai', 'Manachai Lapootama', 'CAD1', 'user', 'Bang Phli', '085-1501836', 1, 'กิจส่วนตัว', '2024-09-26', '08:00:00', '2024-09-26', '11:45:00', '0', '2024-09-26 16:07:33', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, '1', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(201, '5907312', 'Umaporn', 'Umaporn Klinmueang', 'Office', 'user', 'Bang Phli', '089-7029722', 1, 'กิจส่วนตัว', '2024-09-26', '08:00:00', '2024-09-26', '16:40:00', '0', '2024-09-26 16:23:54', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, '1', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(202, '6302388', 'Ketsada', 'Ketsada Pumpukwan', 'Office', 'user', 'Bang Phli', '062-7260365', 1, 'กิจส่วนตัว', '2024-09-26', '08:00:00', '2024-09-27', '16:40:00', '0', '2024-09-26 16:32:28', NULL, NULL, NULL, NULL, '3', 'Siriporn', '2024-09-26 17:17:53', NULL, '1', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(233, '4505071', 'Suwannee', 'Suwannee Khunchamnong', 'Office', 'user', 'Bang Phli', '087-9261470', 1, 'กิจส่วนตัว', '2024-09-28', '08:00:00', '2024-09-28', '16:40:00', '0', '2024-09-28 15:09:54', NULL, NULL, NULL, NULL, '0', NULL, NULL, NULL, '1', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(234, '4505071', 'Suwannee', 'Suwannee Khunchamnong', 'Office', 'user', 'Bang Phli', '087-9261470', 1, 'กิจส่วนตัว', '2024-09-28', '08:00:00', '2024-09-28', '16:40:00', '0', '2024-09-28 15:27:50', NULL, NULL, NULL, 'ลาฉุกเฉิน', '0', NULL, NULL, NULL, '1', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(235, '4505071', 'Suwannee', 'Suwannee Khunchamnong', 'Office', 'user', 'Bang Phli', '087-9261470', 1, 'กิจส่วนตัว', '2024-09-28', '08:00:00', '2024-09-28', '16:40:00', '1', '2024-09-28 15:28:50', '2024-09-28 15:49:26', NULL, NULL, 'ลาฉุกเฉิน', '0', '', NULL, '', '1', '', NULL, '', '0', '', NULL, NULL, NULL, NULL, NULL, NULL),
+(236, '3505004', 'Anchana', 'Anchana Assawaphimjinda', 'Management', 'manager', 'Bang Phli', '081-6465557', 1, 'กิจส่วนตัว', '2024-09-28', '08:00:00', '2024-09-28', '16:40:00', '1', '2024-09-28 15:29:48', '2024-09-28 15:56:27', NULL, NULL, 'ลาฉุกเฉิน', '6', '', NULL, '', '4', 'Anchana', '2024-09-28 15:56:27', '', '0', '', NULL, NULL, NULL, NULL, NULL, NULL),
+(237, '4404049', 'Wiriya', 'Wiriya Houychae', 'Office', 'leader', 'Bang Phli', '089-1465339', 1, 'กิจส่วนตัว', '2024-09-28', '08:00:00', '2024-09-28', '16:40:00', '1', '2024-09-28 15:30:13', '2024-09-28 15:52:33', NULL, NULL, 'ลาฉุกเฉิน', '2', 'Wiriya', '2024-09-28 15:52:33', '', '1', '', NULL, '', '0', '', NULL, NULL, NULL, NULL, NULL, NULL),
+(238, '5602251', 'Waewdow', 'Waewdow Boonsawai', 'Management', 'chief', 'Bang Phli', '089-1254542', 1, 'กิจส่วนตัว', '2024-09-28', '08:00:00', '2024-09-28', '16:40:00', '1', '2024-09-28 15:38:28', '2024-09-28 15:53:50', NULL, NULL, NULL, '2', 'Waewdow', '2024-09-28 15:53:50', '', '1', '', NULL, '', '0', '', NULL, NULL, NULL, NULL, NULL, NULL),
+(239, '4505071', 'Suwannee', 'Suwannee Khunchamnong', 'Office', 'user', 'Bang Phli', '087-9261470', 7, 'มาสาย', '2024-09-28', '08:01:00', '2024-09-28', '08:02:00', '0', '2024-09-28 16:01:10', NULL, '2024-09-28 11:01:28', NULL, 'มาสายครั้งที่ 1', '2', 'Wiriya', '2024-09-28 11:18:27', NULL, '1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Natnicha', '2024-09-28 16:01:10', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -420,7 +423,7 @@ CREATE TABLE `session` (
 --
 
 INSERT INTO `session` (`s_id`, `s_usercode`, `s_username`, `s_password`, `s_name`, `s_department`, `s_level`, `s_workplace`, `s_status`, `s_log_status`, `s_login_datetime`, `s_logout_datetime`) VALUES
-(1, '3505004', 'Anchana', '3505004', 'Anchana Assawaphimjinda', 'Management', 'manager', 'Bang Phli', '0', '0', '2024-09-26 16:01:47', '2024-09-26 16:01:54'),
+(1, '3505004', 'Anchana', '3505004', 'Anchana Assawaphimjinda', 'Management', 'manager', 'Bang Phli', '0', '0', '2024-09-28 15:53:58', '2024-09-28 15:58:35'),
 (2, '3802006', 'Theeraphat', '3802006', 'Theeraphat Thongprasom', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (3, '3805009', 'Sarawut', '3805009', 'Sarawut Sekunnumtieng', 'MC', 'leader', 'Bang Phli', '0', '0', '2024-09-23 15:44:55', '2024-09-23 15:59:27'),
 (4, '3904011', 'Rachen', '3904011', 'Rachen Kanpookeaw', 'FN', 'user', 'Bang Phli', '0', '0', NULL, NULL),
@@ -428,12 +431,12 @@ INSERT INTO `session` (`s_id`, `s_usercode`, `s_username`, `s_password`, `s_name
 (6, '4001017', 'Somchart', '4001017', 'Somchart Kladkhempetch', 'CAD1', 'user', 'Bang Phli', '0', '0', '2024-09-25 15:16:42', '2024-09-25 16:36:12'),
 (7, '4108024', 'Nathaphon', '4108024', 'Nathaphon Kaewkanha', 'FN', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (8, '4302029', 'Chalad', '4302029', 'Chalad Seesamea', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
-(9, '4403044', 'Wirat', '4403044', 'Wirat Manangan', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-23 18:16:20', '2024-09-23 18:25:04'),
+(9, '4403044', 'Wirat', '4403044', 'Wirat Manangan', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-28 15:32:23', '2024-09-28 15:32:30'),
 (10, '4404047', 'Suriya', '4404047', 'Suriya Pimol', 'Management', 'chief', 'Bang Phli', '0', '0', '2024-09-24 16:26:18', '2024-09-24 16:27:32'),
-(11, '4404049', 'Wiriya', '4404049', 'Wiriya Houychae', 'Office', 'leader', 'Bang Phli', '0', '0', '2024-09-26 13:54:00', '2024-09-26 14:29:09'),
+(11, '4404049', 'Wiriya', '4404049', 'Wiriya Houychae', 'Office', 'leader', 'Bang Phli', '0', '1', '2024-09-28 16:09:16', '2024-09-28 15:53:41'),
 (12, '4410058', 'Chaikorn', '4410058', 'Chaikorn Suriyasa', 'Management', 'assisManag', 'Bang Phli', '0', '0', NULL, NULL),
 (13, '4502068', 'Preecha', '4502068', 'Preecha Thaboonrueng', 'MC', 'leader', 'Bang Phli', '0', '0', NULL, NULL),
-(14, '4505071', 'Suwannee', '4505071', 'Suwannee Khunchamnong\r\n', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-25 16:36:15', '2024-09-25 17:30:06'),
+(14, '4505071', 'Suwannee', '4505071', 'Suwannee Khunchamnong\r\n', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-28 16:01:24', '2024-09-28 16:09:03'),
 (15, '4506073', 'Thepparit', '4506073', 'Thepparit Pasee\r\n', 'CAD1', 'leader', 'Bang Phli', '0', '0', NULL, NULL),
 (16, '4512084', 'Niran', '4512084', 'Niran Sea-Or', 'QC', 'leader', 'Bang Phli', '0', '0', '2024-09-24 17:13:10', '2024-09-24 17:41:25'),
 (17, '4512085', 'Anon', '4512085', 'Anon Maneechot', 'MC', 'leader', 'Bang Phli', '0', '0', '2024-09-26 15:01:04', '2024-09-26 15:01:10'),
@@ -441,7 +444,7 @@ INSERT INTO `session` (`s_id`, `s_usercode`, `s_username`, `s_password`, `s_name
 (19, '4606097', 'Chaiyaporn', '4606097', 'Chaiyaporn Poukpoon', 'CAM', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (20, '4606098', 'Thawatyuty', '4606098', 'Thawatyutyotha Photirat', 'FN', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (21, '4610104', 'U-Thai', '4610104', 'U-Thai Chaiyaocha', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
-(22, '4704110', 'Siriporn', '4704110', 'Siriporn Chuaikhoksung', 'Management', 'chief', 'Bang Phli', '0', '0', '2024-09-26 17:22:05', '2024-09-26 17:23:02'),
+(22, '4704110', 'Siriporn', '4704110', 'Siriporn Chuaikhoksung', 'Management', 'chief', 'Bang Phli', '0', '0', '2024-09-28 15:02:28', '2024-09-28 15:07:04'),
 (23, '4708116', 'Thanyaboon', '4708116', 'Thanyaboon Phokead', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (24, '4803121', 'Prasert', '4803121', 'Prasert Kaweebua', 'CAD2', 'leader', 'Bang Phli', '0', '0', NULL, NULL),
 (25, '4804123', 'Sathiya', '4804123', 'Sathiya Suksanguanthai', 'CAM', 'user', 'Bang Phli', '0', '0', NULL, NULL),
@@ -459,17 +462,17 @@ INSERT INTO `session` (`s_id`, `s_usercode`, `s_username`, `s_password`, `s_name
 (37, '5111178', 'Yongwit', '5111178', 'Yongwit Chasanthia', 'CAD1', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (38, '5303180', 'Pongsak', '5303180', 'Pongsak Yodkhammee', 'CAD2', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (39, '5303181', 'Thanu', '5303181', 'Thanu Kunying', 'CAD1', 'user', 'Bang Phli', '0', '0', NULL, NULL),
-(40, '5303183', 'Natnicha', '5303183', 'Natnicha Maneechot', 'Office', 'admin', 'Bang Phli', '0', '0', '2024-09-26 14:54:13', '2024-09-26 14:54:35'),
+(40, '5303183', 'Natnicha', '5303183', 'Natnicha Maneechot', 'Office', 'admin', 'Bang Phli', '0', '0', '2024-09-28 16:00:51', '2024-09-28 16:01:20'),
 (41, '5307186', 'Jeerasak', '5307186', 'Jeerasak Chaydam', 'CAM', 'user', 'Bang Phli', '0', '0', NULL, NULL),
-(42, '5311196', 'Tussanee', '5311196', 'Tussanee Soparut', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-24 14:06:29', '2024-09-24 14:06:40'),
+(42, '5311196', 'Tussanee', '5311196', 'Tussanee Soparut', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-27 08:39:19', '2024-09-27 08:50:32'),
 (43, '5505228', 'Wasitporn', '5505228', 'Wasitporn Nuekthuek', 'Management', 'chief', 'Bang Phli', '0', '0', NULL, NULL),
 (44, '5506235', 'Saeksan', '5506235', 'Saeksan Dungsungnoen', 'PC', 'leader', 'Bang Phli', '0', '0', NULL, NULL),
 (45, '5602249', 'Chatchawan', '5602249', 'Chatchawan Einnoy', 'CAM', 'user', 'Bang Phli', '0', '0', NULL, NULL),
-(46, '5602251', 'Waewdow', '5602251', 'Waewdow Boonsawai', 'Management', 'chief', 'Bang Phli', '0', '0', NULL, NULL),
+(46, '5602251', 'Waewdow', '5602251', 'Waewdow Boonsawai', 'Management', 'chief', 'Bang Phli', '0', '0', '2024-09-28 15:53:46', '2024-09-28 15:53:54'),
 (47, '5603257', 'Wongthawat', '5603257', 'Wongthawat Phupanna', 'FN', 'leader', 'Bang Phli', '0', '0', NULL, NULL),
 (48, '5608269', 'Umapan', '5608269', 'Umapan Pinitkul', 'CAD1', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (49, '5810302', 'Pornsuk', '5810302', 'Pornsuk Tantivisanusopit', 'Management', 'manager', 'Bang Phli', '0', '0', '2024-09-26 15:20:57', '2024-09-26 15:21:03'),
-(50, '5907312', 'Umaporn', '5907312', 'Umaporn Klinmueang', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-26 16:23:07', '2024-09-26 16:32:14'),
+(50, '5907312', 'Umaporn', '5907312', 'Umaporn Klinmueang', 'Office', 'user', 'Bang Phli', '0', '0', '2024-09-28 13:39:18', '2024-09-28 13:39:38'),
 (51, '5909317', 'Suphatsorn', '5909317', 'Suphatsorn Thiabphim', 'FN', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (52, '6002318', 'Siriruch', '6002318', 'Siriruch Chainrum', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (53, '6005323', 'Aphisit', '6005323', 'Aphisit Vichangern', 'FN', 'user', 'Bang Phli', '0', '0', NULL, NULL),
@@ -498,7 +501,7 @@ INSERT INTO `session` (`s_id`, `s_usercode`, `s_username`, `s_password`, `s_name
 (76, '6604412', 'Waewdao', '6604412', 'Waewdao Raksa-Ngam', 'QC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (77, '6604413', 'Chaiwat', '6604413', 'Chaiwat Poonsanoi', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (78, '6604414', 'Nichapa', '6604414', 'Nichapa Chantarayothakul', 'RD', 'user', 'Bang Phli', '0', '0', NULL, NULL),
-(79, '6608418', 'Kanyapa', '6608418', 'Kanyapa Saetiew', 'RD', 'user', 'Bang Phli', '0', '0', '2024-09-26 15:52:36', '2024-09-26 15:59:06'),
+(79, '6608418', 'Kanyapa', '6608418', 'Kanyapa Saetiew', 'RD', 'user', 'Bang Phli', '0', '1', '2024-09-27 18:01:05', '2024-09-26 15:59:06'),
 (80, '6608420', 'Sarawut', '6608420', 'Sarawut Champathip', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (81, '6611422', 'Anattapong', '6611422', 'Anattapong Wongsuwan', 'CAM', 'user', 'Bang Phli', '0', '0', NULL, NULL),
 (82, '6611423', 'Saichon', '6611423', 'Saichon Bunsamret', 'MC', 'user', 'Bang Phli', '0', '0', NULL, NULL),
@@ -611,7 +614,7 @@ ALTER TABLE `holiday`
 -- AUTO_INCREMENT for table `leave_list`
 --
 ALTER TABLE `leave_list`
-  MODIFY `l_list_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=203;
+  MODIFY `l_list_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=240;
 
 --
 -- AUTO_INCREMENT for table `level`
