@@ -2062,8 +2062,9 @@ echo '</div>';
             var lateStart = $(rowData[4]).text();
             var lateEnd = $(rowData[5]).text();
             var leaveStatus = $(rowData[13]).text();
+            var workplace = "<?php echo $workplace ?>";
 
-            // alert(userCode)
+            alert(depart)
             Swal.fire({
                 title: "ยืนยันรายการมาสาย ?",
                 icon: "question",
@@ -2087,6 +2088,8 @@ echo '</div>';
                             userCode: userCode,
                             comfirmName: comfirmName,
                             leaveStatus: leaveStatus,
+                            workplace: workplace,
+                            level: level,
                             action: 'comfirm'
                         },
                         success: function(response) {

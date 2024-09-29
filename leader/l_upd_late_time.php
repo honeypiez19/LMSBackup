@@ -1,7 +1,10 @@
 <?php
+date_default_timezone_set('Asia/Bangkok');
+
 require_once '../connect.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // เก็บข้อมูลจาก POST
     $userName = $_POST['userName'];
     $proveName = $_POST['proveName'];
     $createDateTime = $_POST['createDateTime'];
@@ -15,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
     $comfirmName = $_POST['comfirmName'];
     $level = $_POST['level'];
+    $workplace = $_POST['workplace'];
 
     $proveDate = date('Y-m-d H:i:s');
 
@@ -32,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Update สถานะการอนุมัติในฐานข้อมูล
     $sql = "UPDATE leave_list SET l_approve_status = :status,
     l_approve_datetime = :proveDate,
     l_approve_name = :userName
@@ -45,86 +50,191 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->bindValue(':userName', $userName, PDO::PARAM_STR);
 
     if ($stmt->execute()) {
-        if ($action === 'comfirm') {
-            // ส่งการแจ้งเตือนถึงผู้จัดการ
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_sub_department = 'Office' AND e_level = 'manager'");
-            $stmt->execute();
-            $managerResult = $stmt->fetch(PDO::FETCH_ASSOC);
-            $managerToken = $managerResult['e_token'];
-
-            $sURL = 'https://lms.system-samt.com/';
+        $sURL = 'https://lms.system-samt.com/';
+       
+        if($action === 'approve'){
             $sMessage = "$message \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
 
-            // แจ้งเตือนผู้จัดการ
-            $chOne = curl_init();
-            curl_setopt_array($chOne, [
-                CURLOPT_URL => "https://notify-api.line.me/api/notify",
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_POST => 1,
-                CURLOPT_POSTFIELDS => http_build_query(["message" => $sMessage]),
-                CURLOPT_HTTPHEADER => ['Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $managerToken],
-                CURLOPT_RETURNTRANSFER => 1,
-            ]);
-            $managerResult = curl_exec($chOne);
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
+            if ($depart == 'RD') {
+                // แจ้งไลน์โฮซัง
+                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
+                // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
+                // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
+                $stmt->bindParam(':workplace', $workplace);
+                // $stmt->bindParam(':depart', $depart);
+    
+            } else if ($level == 'leader') {
+                if ($depart == 'Office') {
+                    // แจ้งเตือนไปที่พี่ตุ๊ก
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
+            } else if ($level == 'chief') {
+                if ($depart == 'Management') {
+                    // แจ้งเตือนไปที่พี่ตุ๊ก
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
+            } else {
+                echo "ไม่พบเงื่อนไข";
+                // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_workplace = :workplace AND e_level IN ('chief', 'manager')");
+                // $stmt->bindParam(':depart', $depart);
+                // $stmt->bindParam(':workplace', $workplace);
             }
-            curl_close($chOne);
-
-            // แจ้งเตือนไลน์พนักงาน
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :userCode");
-            $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
+    
             $stmt->execute();
-            $employeeResult = $stmt->fetch(PDO::FETCH_ASSOC);
-            $employeeToken = $employeeResult['e_token'];
-
-            $chTwo = curl_init();
-            curl_setopt_array($chTwo, [
-                CURLOPT_URL => "https://notify-api.line.me/api/notify",
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_POST => 1,
-                CURLOPT_POSTFIELDS => http_build_query(["message" => $sMessage]),
-                CURLOPT_HTTPHEADER => ['Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $employeeToken],
-                CURLOPT_RETURNTRANSFER => 1,
-            ]);
-            $employeeResult = curl_exec($chTwo);
-            if (curl_error($chTwo)) {
-                echo 'Error:' . curl_error($chTwo);
+            $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            if ($managers) {
+                foreach ($managers as $manager) {
+                    $sToken = $manager['e_token'];
+    
+                    $chOne = curl_init();
+                    curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                    curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                    curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                    curl_setopt($chOne, CURLOPT_POST, 1);
+                    curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
+                    $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken . '');
+                    curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                    curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                    $result = curl_exec($chOne);
+    
+                    if (curl_error($chOne)) {
+                        echo 'Error:' . curl_error($chOne);
+                    } else {
+                        $result_ = json_decode($result, true);
+                        echo "status : " . $result_['status'] . "<br>";
+                        echo "message : " . $result_['message'] . "<br>";
+                    }
+                    curls_close($chOne);
+                }
+            } else {
+                echo "No tokens found for manager";
             }
-            curl_close($chTwo);
+        } 
+        else if($action === 'deny'){
+            $sMessage = "$message \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
 
-            echo "อัปเดตสถานะสำเร็จ";
-        } else {
-            // แจ้งเตือนไลน์ผู้จัดการ
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('manager')");
-            $stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+            if ($depart == 'RD') {
+                // แจ้งไลน์โฮซัง
+                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
+                // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
+                // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
+                $stmt->bindParam(':workplace', $workplace);
+                // $stmt->bindParam(':depart', $depart);
+    
+            } else if ($level == 'leader') {
+                if ($depart == 'Office') {
+                    // แจ้งเตือนไปที่พี่ตุ๊ก
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
+            } else if ($level == 'chief') {
+                if ($depart == 'Management') {
+                    // แจ้งเตือนไปที่พี่ตุ๊ก
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
+            } else {
+                echo "ไม่พบเงื่อนไข";
+                // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_workplace = :workplace AND e_level IN ('chief', 'manager')");
+                // $stmt->bindParam(':depart', $depart);
+                // $stmt->bindParam(':workplace', $workplace);
+            }
+    
             $stmt->execute();
-            $managerResult = $stmt->fetch(PDO::FETCH_ASSOC);
-            $managerToken = $managerResult['e_token'];
-
-            $sURL = 'https://lms.system-samt.com/';
-            $sMessage = "$message $name \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
-
-            $chOne = curl_init();
-            curl_setopt_array($chOne, [
-                CURLOPT_URL => "https://notify-api.line.me/api/notify",
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-                CURLOPT_POST => 1,
-                CURLOPT_POSTFIELDS => http_build_query(["message" => $sMessage]),
-                CURLOPT_HTTPHEADER => ['Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $managerToken],
-                CURLOPT_RETURNTRANSFER => 1,
-            ]);
-            $managerResult = curl_exec($chOne);
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
+            $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            if ($managers) {
+                foreach ($managers as $manager) {
+                    $sToken = $manager['e_token'];
+    
+                    $chOne = curl_init();
+                    curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                    curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                    curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                    curl_setopt($chOne, CURLOPT_POST, 1);
+                    curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
+                    $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken . '');
+                    curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                    curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                    $result = curl_exec($chOne);
+    
+                    if (curl_error($chOne)) {
+                        echo 'Error:' . curl_error($chOne);
+                    } else {
+                        $result_ = json_decode($result, true);
+                        echo "status : " . $result_['status'] . "<br>";
+                        echo "message : " . $result_['message'] . "<br>";
+                    }
+                    curls_close($chOne);
+                }
+            } else {
+                echo "No tokens found for manager";
             }
-            curl_close($chOne);
+        }  
+        else if($action === 'comfirm'){
+            $sMessage = "$comfirmName $message \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
 
+            if ($depart == 'RD') {
+                // แจ้งไลน์โฮซัง
+                $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department =  'RD'");
+                // $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE e_department = 'Management' AND e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = :depart");
+                // $stmt = $conn->prepare("SELECT e_username, e_token FROM employees WHERE e_level = 'manager' AND e_workplace = 'Bang Phli' AND e_sub_department = 'RD'");
+                $stmt->bindParam(':workplace', $workplace);
+                // $stmt->bindParam(':depart', $depart);
+    
+            } else if ($level == 'leader') {
+                if ($depart == 'Office') {
+                    // แจ้งเตือนไปที่พี่ตุ๊ก
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
+            } else if ($level == 'chief') {
+                if ($depart == 'Management') {
+                    // แจ้งเตือนไปที่พี่ตุ๊ก
+                    $stmt = $conn->prepare("SELECT e_token, e_username FROM employees WHERE  e_workplace = :workplace AND e_level = 'manager' AND e_sub_department = 'Office'");
+                    $stmt->bindParam(':workplace', $workplace);
+                }
+            } else {
+                echo "ไม่พบเงื่อนไข";
+                // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_workplace = :workplace AND e_level IN ('chief', 'manager')");
+                // $stmt->bindParam(':depart', $depart);
+                // $stmt->bindParam(':workplace', $workplace);
+            }
+    
+            $stmt->execute();
+            $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            if ($managers) {
+                foreach ($managers as $manager) {
+                    $sToken = $manager['e_token'];
+    
+                    $chOne = curl_init();
+                    curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                    curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                    curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                    curl_setopt($chOne, CURLOPT_POST, 1);
+                    curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
+                    $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken . '');
+                    curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                    curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                    $result = curl_exec($chOne);
+    
+                    if (curl_error($chOne)) {
+                        echo 'Error:' . curl_error($chOne);
+                    } else {
+                        $result_ = json_decode($result, true);
+                        echo "status : " . $result_['status'] . "<br>";
+                        echo "message : " . $result_['message'] . "<br>";
+                    }
+                    curls_close($chOne);
+                }
+            } else {
+                echo "No tokens found for manager";
+            }
         }
-
     } else {
         echo 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล';
     }

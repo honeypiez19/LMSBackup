@@ -873,6 +873,9 @@ if (count($result) > 0) {
             var rowData = $(this).closest('tr').children('td'); // แก้ไขเพื่อหาค่าจากแถวที่เกี่ยวข้อง
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
+            var workplace = '<?php echo $workplace; ?>';
+
             var createDateTime = $(this).data(
                 'create-datetime'); // เพิ่มบรรทัดนี้เพื่อรับค่า l_create_datetime
             var depart = $(rowData[0]).text(); // แผนก
@@ -883,7 +886,7 @@ if (count($result) > 0) {
             var name = $(rowData[6]).text();
             var leaveStatus = $(rowData[9]).text();
 
-            // alert(name)
+            // alert(workplace)
             // alert(leaveStatus)
             $('.btn-approve').off('click');
 
@@ -924,6 +927,8 @@ if (count($result) > 0) {
                             userCode: userCode,
                             name: name,
                             leaveStatus: leaveStatus,
+                            level: level,
+                            workplace: workplace,
                             action: 'approve'
                         },
                         success: function(response) {
@@ -962,6 +967,8 @@ if (count($result) > 0) {
                             userCode: userCode,
                             name: name,
                             leaveStatus: leaveStatus,
+                            level: level,
+                            workplace: workplace,
                             action: 'deny'
                         },
                         success: function(response) {

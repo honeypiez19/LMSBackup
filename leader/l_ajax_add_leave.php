@@ -217,7 +217,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     echo "status : " . $result_['status'] . "<br>";
                     echo "message : " . $result_['message'] . "<br>";
                 }
-                curl_close($chOne);
+                curls_close($chOne);
             }
         } else {
             echo "No tokens found for manager";
