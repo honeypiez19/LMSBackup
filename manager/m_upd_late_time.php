@@ -45,63 +45,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';
-        $sMessage = "$message \nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
 
-        // ส่งการแจ้งเตือนถึงผู้จัดการ
-        if ($action === 'comfirm') {
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :userCode");
-            $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-            $stmt->execute();
-            $adminResult = $stmt->fetch(PDO::FETCH_ASSOC);
+        $sMessage = "$message $name\nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
 
-            if ($adminResult) {
-                $adminToken = $adminResult['e_token'];
+        // แจ้งเตือน K. พรสุข
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'manager' AND e_sub_department = 'All'");
+        $stmt->bindValue(':workplace', $workplace, PDO::PARAM_STR);
+        $stmt->execute();
+        $managers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        if ($managers) {
+            foreach ($managers as $manager) {
+                $sToken = $manager['e_token'];
                 $chOne = curl_init();
-                curl_setopt_array($chOne, [
-                    CURLOPT_URL => "https://notify-api.line.me/api/notify",
-                    CURLOPT_SSL_VERIFYHOST => 0,
-                    CURLOPT_SSL_VERIFYPEER => 0,
-                    CURLOPT_POST => 1,
-                    CURLOPT_POSTFIELDS => http_build_query(["message" => $sMessage]),
-                    CURLOPT_HTTPHEADER => ['Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $adminToken],
-                    CURLOPT_RETURNTRANSFER => 1,
-                ]);
-                $adminResult = curl_exec($chOne);
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
+                $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken);
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
                 if (curl_error($chOne)) {
-                    echo 'Error (Admin): ' . curl_error($chOne);
+                    echo 'Error:' . curl_error($chOne);
                 }
                 curl_close($chOne);
             }
         } else {
-            // แจ้งเตือนไลน์พนักงาน
-            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :userCode");
-            $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
-            $stmt->execute();
-            $employeeResult = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($employeeResult) {
-                $employeeToken = $employeeResult['e_token'];
-
-                $chTwo = curl_init();
-                curl_setopt_array($chTwo, [
-                    CURLOPT_URL => "https://notify-api.line.me/api/notify",
-                    CURLOPT_SSL_VERIFYHOST => 0,
-                    CURLOPT_SSL_VERIFYPEER => 0,
-                    CURLOPT_POST => 1,
-                    CURLOPT_POSTFIELDS => http_build_query(["message" => $sMessage]),
-                    CURLOPT_HTTPHEADER => ['Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $employeeToken],
-                    CURLOPT_RETURNTRANSFER => 1,
-                ]);
-                $employeeResult = curl_exec($chTwo);
-                if (curl_error($chTwo)) {
-                    echo 'Error (Employee): ' . curl_error($chTwo);
-                }
-                curl_close($chTwo);
-            }
+            echo "No tokens found for manager";
         }
+        // แจ้งเตือน พนง.
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :userCode");
+        $stmt->bindValue(':userCode', $userCode, PDO::PARAM_STR);
+        $stmt->execute();
+        $employee = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        echo "อัปเดตสถานะสำเร็จ";
+        if ($employee) {
+            $sToken = $employee['e_token'];
+            $sMessage = "$message $name\nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
+            $chOne = curl_init();
+            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($chOne, CURLOPT_POST, 1);
+            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
+            $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken);
+            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+            $result = curl_exec($chOne);
+
+            if (curl_error($chOne)) {
+                echo 'Error:' . curl_error($chOne);
+            }
+            curl_close($chOne);
+        } else {
+            echo "ไม่พบ Token ของพนักงาน";
+        }
+        
+         // แจ้งเตือน Admin
+         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+         $stmt->execute();
+         $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+ 
+         if ($admins) {
+             foreach ($admins as $admin) {
+                 $sToken = $admin['e_token'];
+                 $chOne = curl_init();
+                 curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                 curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                 curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                 curl_setopt($chOne, CURLOPT_POST, 1);
+                 curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
+                 $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken);
+                 curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                 curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                 $result = curl_exec($chOne);
+ 
+                 if (curl_error($chOne)) {
+                     echo 'Error:' . curl_error($chOne);
+                 }
+                 curl_close($chOne);
+             }
+         } else {
+             echo "ไม่พบ Token ของแอดมิน";
+         }
     } else {
         echo 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล';
     }

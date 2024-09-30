@@ -110,7 +110,7 @@ if ($status == '4') {
             curl_close($chOne);
         }
 
-        // แจ้งเตือนผู้จัดการ
+        // แจ้งเตือน K. พรสุข
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'manager' AND e_sub_department = 'All'");
         $stmt->execute();
         $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -214,6 +214,41 @@ if ($status == '4') {
             $headers = array(
                 'Content-type: application/x-www-form-urlencoded',
                 'Authorization: Bearer ' . $sToken,
+            );
+            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+            $result = curl_exec($chOne);
+
+            if (curl_error($chOne)) {
+                echo 'Error:' . curl_error($chOne);
+            } else {
+                $result_ = json_decode($result, true);
+                echo "status : " . $result_['status'] . "\n";
+                echo "message : " . $result_['message'] . "\n";
+            }
+            curl_close($chOne);
+        }
+
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'manager' AND e_sub_department = 'All'");
+        $stmt->execute();
+        $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $message = "$proveName ไม่อนุมัติใบลา \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+        if ($leaveStatus == 'ยกเลิกใบลา') {
+            $message = " $proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        }
+
+        foreach ($managerTokens as $managerToken) {
+            $chOne = curl_init();
+            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($chOne, CURLOPT_POST, 1);
+            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+            $headers = array(
+                'Content-type: application/x-www-form-urlencoded',
+                'Authorization: Bearer ' . $managerToken,
             );
             curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
