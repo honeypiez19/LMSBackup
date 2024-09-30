@@ -2090,7 +2090,7 @@ echo '</div>';
                             leaveStatus: leaveStatus,
                             workplace: workplace,
                             level: level,
-                            action: 'comfirm'
+                            action: 'confirm'
                         },
                         success: function(response) {
                             Swal.fire({

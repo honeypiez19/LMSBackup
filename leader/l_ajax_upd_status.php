@@ -34,7 +34,7 @@ if ($status == '2') {
     $stmt->bindParam(':createDate', $createDate);
 
     if ($stmt->execute()) {
-        // ดึง token พนักงาน
+        // แจ้งเตือน พนง
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :usercode");
         $stmt->bindParam(':usercode', $userCode);
         $stmt->execute();
@@ -74,7 +74,7 @@ if ($status == '2') {
             curl_close($chOne);
         }
 
-        // แจ้งเตือนผู้จัดการในแผนก
+        // แจ้งเตือนพี่ตุ๊ก
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = '3505004' AND e_level = 'manager'");
         $stmt->execute();
         $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
@@ -83,6 +83,7 @@ if ($status == '2') {
         if ($leaveStatus == 'ยกเลิกใบลา') {
             $managerMessage = "$empName ยกเลิกใบลา\n$proveName อนุมัติยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
         }
+
         foreach ($managerTokens as $sToken) {
             $chOne = curl_init();
             curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
@@ -125,7 +126,7 @@ else if ($status == '3') {
     $stmt->bindParam(':createDate', $createDate);
 
     if ($stmt->execute()) {
-        // ดึง token พนักงาน
+        // แจ้งเตือน พนง
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :usercode");
         $stmt->bindParam(':usercode', $userCode);
         $stmt->execute();
@@ -165,15 +166,16 @@ else if ($status == '3') {
             curl_close($chOne);
         }
 
-        // แจ้งเตือนผู้จัดการในแผนก
+        // แจ้งเตือนพี่ตุ๊ก
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = '3505004' AND e_level = 'manager'");
         $stmt->execute();
         $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        $managerMessage = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        $managerMessage = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
         if ($leaveStatus == 'ยกเลิกใบลา') {
             $managerMessage = "$empName ยกเลิกใบลา\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
         }
+
         foreach ($managerTokens as $sToken) {
             $chOne = curl_init();
             curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");

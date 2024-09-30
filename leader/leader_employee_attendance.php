@@ -415,7 +415,8 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear
+$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth'
+AND Year(l_create_datetime) = $selectedYear
 AND l_leave_id = 7
 AND l_department = '$depart'
 AND NOT l_level IN ('chief','manager')
@@ -630,7 +631,8 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 6 AND l_department = '$depart' AND Month(l_create_datetime) = '$selectedMonth'AND Year(l_create_datetime) = $selectedYear";
+$sql = "SELECT * FROM leave_list WHERE l_leave_id = 6 AND l_department = '$depart'
+AND Month(l_create_datetime) = '$selectedMonth'AND Year(l_create_datetime) = $selectedYear";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 

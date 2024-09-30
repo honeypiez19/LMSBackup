@@ -18,6 +18,8 @@ $leaveReason = $_POST['leaveReason'];
 $leaveStartDate = $_POST['leaveStartDate'];
 $leaveEndDate = $_POST['leaveEndDate'];
 $depart = $_POST['depart'];
+$leaveStatus = $_POST['leaveStatus'];
+$empName = $_POST['empName'];
 
 // อนุมัติ
 if ($status == '2') {
@@ -32,12 +34,16 @@ if ($status == '2') {
 
     if ($stmt->execute()) {
         // แจ้งเตือนพนักงาน
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :usercode");
-        $stmt->bindParam(':usercode', $userCode);
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :userCode");
+        $stmt->bindParam(':userCode', $userCode);
         $stmt->execute();
         $sToken = $stmt->fetchColumn();
         $sURL = 'https://lms.system-samt.com/';
         $sMessage = "$proveName อนุมัติใบลา \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+        if ($leaveStatus == 'ยกเลิกใบลา') {
+            $message = " $proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        }
 
         if ($sToken) {
             $chOne = curl_init();
@@ -64,20 +70,24 @@ if ($status == '2') {
             curl_close($chOne);
         }
 
-        // แจ้งเตือนผู้จัดการในแผนก
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level = 'manager'");
-        $stmt->bindParam(':depart', $depart);
+        // แจ้งเตือนพี่ตุ๊ก
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = '3505004' AND e_level = 'manager'");
+        // $stmt->bindParam(':depart', $depart);
         $stmt->execute();
         $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
         // $mMessage = "ผจก";
+        $managerMessage = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
+        if ($leaveStatus == 'ยกเลิกใบลา') {
+            $managerMessage = "$empName ยกเลิกใบลา\n$proveName อนุมัติยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        }
         foreach ($managerTokens as $sToken) {
             $chOne = curl_init();
             curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
             curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($sMessage));
+            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($managerMessage));
             $headers = array(
                 'Content-type: application/x-www-form-urlencoded',
                 'Authorization: Bearer ' . $sToken,
@@ -144,12 +154,18 @@ else if ($status == '3') {
 
     if ($stmt->execute()) {
         // แจ้งเตือนไลน์พนักงาน
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :usercode");
-        $stmt->bindParam(':usercode', $userCode);
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :userCode");
+        $stmt->bindParam(':userCode', $userCode);
         $stmt->execute();
         $sToken = $stmt->fetchColumn();
         $sURL = 'https://lms.system-samt.com/';
-        $sMessage = "$proveName ไม่อนุมัติใบลา \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+        // ข้อความแจ้งเตือน
+        $message = "$proveName ไม่อนุมัติใบลา \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+        if ($leaveStatus == 'ยกเลิกใบลา') {
+            $message = "$proveName ไม่อนุมัติยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        }
 
         if ($sToken) {
             $chOne = curl_init();
@@ -157,7 +173,7 @@ else if ($status == '3') {
             curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($sMessage));
+            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
             $headers = array(
                 'Content-type: application/x-www-form-urlencoded',
                 'Authorization: Bearer ' . $sToken,
@@ -176,11 +192,16 @@ else if ($status == '3') {
             curl_close($chOne);
         }
 
-        // แจ้งเตือนไลน์ผู้จัดการในแผนก
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level = 'manager'");
-        $stmt->bindParam(':depart', $depart);
+        // แจ้งเตือนพี่ตุ๊ก
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = '3505004' AND e_level = 'manager'");
+        // $stmt->bindParam(':depart', $depart);
         $stmt->execute();
         $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $managerMessage = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+        if ($leaveStatus == 'ยกเลิกใบลา') {
+            $managerMessage = "$empName ยกเลิกใบลา\n$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        }
 
         foreach ($managerTokens as $sToken) {
             $chOne = curl_init();
@@ -188,7 +209,7 @@ else if ($status == '3') {
             curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
             curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($sMessage));
+            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($managerMessage));
             $headers = array(
                 'Content-type: application/x-www-form-urlencoded',
                 'Authorization: Bearer ' . $sToken,

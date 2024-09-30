@@ -630,6 +630,7 @@ echo '</div>';
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
+            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
             var depart = $(rowData[2]).text(); // แผนก
             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
@@ -640,7 +641,7 @@ echo '</div>';
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
 
-            alert(proveName)
+            alert(userCode)
             $.ajax({
                 url: 'c_ajax_upd_status.php',
                 method: 'POST',
@@ -654,7 +655,9 @@ echo '</div>';
                     leaveReason: leaveReason,
                     leaveStartDate: leaveStartDate,
                     leaveEndDate: leaveEndDate,
-                    depart: depart
+                    depart: depart,
+                    empName: empName,
+                    leaveStatus: leaveStatus
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -671,10 +674,12 @@ echo '</div>';
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
+            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
             var depart = $(rowData[2]).text(); // แผนก
             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
             var leaveStartDate = $(rowData[9]).text(); // วันเวลาที่ลาเริ่มต้น
             var leaveEndDate = $(rowData[10]).text(); // วันเวลาที่ลาสิ้นสุด
+            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
             var status = '3'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
@@ -693,7 +698,9 @@ echo '</div>';
                     leaveReason: leaveReason,
                     leaveStartDate: leaveStartDate,
                     leaveEndDate: leaveEndDate,
-                    depart: depart
+                    depart: depart,
+                    leaveStatus: leaveStatus,
+                    empName: empName
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -1061,6 +1068,7 @@ echo '</div>';
                                 var createDate = $(rowData[7])
                                     .text(); // วันที่ยื่นใบลา
                                 var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                                var empName = $(rowData[1]).text(); // ชื่อพนักงาน
                                 var depart = $(rowData[2]).text(); // แผนก
                                 var leaveReason = $(rowData[3])
                                     .text(); // เหตุผลการลา
@@ -1068,11 +1076,13 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาเริ่มต้น
                                 var leaveEndDate = $(rowData[10])
                                     .text(); // วันเวลาที่ลาสิ้นสุด
+                                var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
 
+                                // alert(userCode)
                                 $.ajax({
                                     url: 'c_ajax_upd_status.php',
                                     method: 'POST',
@@ -1086,7 +1096,9 @@ echo '</div>';
                                         leaveReason: leaveReason,
                                         leaveStartDate: leaveStartDate,
                                         leaveEndDate: leaveEndDate,
-                                        depart: depart
+                                        depart: depart,
+                                        empName: empName,
+                                        leaveStatus: leaveStatus
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
@@ -1102,12 +1114,14 @@ echo '</div>';
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
+                            var empName = $(rowData[1]).text(); // ชื่อพนักงาน
                             var depart = $(rowData[2]).text(); // แผนก
                             var leaveReason = $(rowData[3]).text(); // เหตุผลการลา
                             var leaveStartDate = $(rowData[9])
                                 .text(); // วันเวลาที่ลาเริ่มต้น
                             var leaveEndDate = $(rowData[10])
                                 .text(); // วันเวลาที่ลาสิ้นสุด
+                            var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
@@ -1126,7 +1140,9 @@ echo '</div>';
                                     leaveReason: leaveReason,
                                     leaveStartDate: leaveStartDate,
                                     leaveEndDate: leaveEndDate,
-                                    depart: depart
+                                    depart: depart,
+                                    leaveStatus: leaveStatus,
+                                    empName: empName
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide');

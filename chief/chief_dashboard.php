@@ -2036,14 +2036,16 @@ echo '</div>';
             var userCode = $(this).data('usercode');
             var userName = "<?php echo $userName ?>";
             var comfirmName = "<?php echo $name ?>";
-            // var leaveType = $(rowData[0]).text();
+            var workplace = "<?php echo $workplace ?>";
+            var level = "<?php echo $level ?>";
+
             var depart = $(rowData[1]).text();
             var lateDate = $(rowData[3]).text();
             var lateStart = $(rowData[4]).text();
             var lateEnd = $(rowData[5]).text();
             var leaveStatus = $(rowData[13]).text();
+            // var action = 'confirm'; // เปลี่ยนเป็น confirm (ไม่ใช้ comfirm ที่สะกดผิด)
 
-            // alert(userCode)
             Swal.fire({
                 title: "ยืนยันรายการมาสาย ?",
                 icon: "question",
@@ -2059,7 +2061,7 @@ echo '</div>';
                         method: 'POST',
                         data: {
                             userName: userName,
-                            createDateTime: createDatetime, // ใช้ createDatetime ที่ได้จาก data attribute
+                            createDateTime: createDatetime,
                             depart: depart,
                             lateDate: lateDate,
                             lateStart: lateStart,
@@ -2067,7 +2069,8 @@ echo '</div>';
                             userCode: userCode,
                             comfirmName: comfirmName,
                             leaveStatus: leaveStatus,
-                            action: 'comfirm'
+                            workplace: workplace,
+                            action: 'confirm'
                         },
                         success: function(response) {
                             Swal.fire({
@@ -2075,7 +2078,7 @@ echo '</div>';
                                 icon: 'success'
                             }).then(() => {
                                 location
-                                    .reload(); // โหลดหน้าใหม่หลังจากยกเลิกใบลา
+                                    .reload(); // โหลดหน้าใหม่หลังจากยืนยันสำเร็จ
                             });
                         },
                         error: function() {
@@ -2088,6 +2091,7 @@ echo '</div>';
                 }
             });
         });
+
     });
 
     function checkOther(select) {

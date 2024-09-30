@@ -135,11 +135,16 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT * FROM leave_list WHERE  Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear
+$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_create_datetime) = '$selectedYear'
+AND Month(l_create_datetime) = '$selectedMonth'
+AND l_level = 'user'
+-- AND l_leave_id <> 6
 AND l_leave_id = 7
-AND l_department = '$depart'
-AND NOT l_level IN ('chief','manager')
 ORDER BY l_create_datetime DESC";
+
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -415,11 +420,23 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear
+// $sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth'
+// AND Year(l_create_datetime) = '$selectedYear'
+// AND l_leave_id = 7
+// AND l_department = '$subDepart'
+// AND NOT l_level IN ('chief','manager')
+// ORDER BY l_create_datetime DESC";
+
+$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_create_datetime) = '$selectedYear'
+AND Month(l_create_datetime) = '$selectedMonth'
+AND l_level = 'user'
+-- AND l_leave_id <> 6
 AND l_leave_id = 7
-AND l_department = '$depart'
-AND NOT l_level IN ('chief','manager')
 ORDER BY l_create_datetime DESC";
+
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -630,7 +647,8 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 6 AND l_department = '$depart' AND Month(l_create_datetime) = '$selectedMonth'AND Year(l_create_datetime) = $selectedYear";
+$sql = "SELECT * FROM leave_list WHERE l_leave_id = 6 AND l_department = '$subDepart'
+AND Month(l_create_datetime) = '$selectedMonth'AND Year(l_create_datetime) = $selectedYear";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -873,6 +891,9 @@ if (count($result) > 0) {
             var rowData = $(this).closest('tr').children('td'); // แก้ไขเพื่อหาค่าจากแถวที่เกี่ยวข้อง
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
+            var workplace = '<?php echo $workplace; ?>';
+
             var createDateTime = $(this).data(
                 'create-datetime'); // เพิ่มบรรทัดนี้เพื่อรับค่า l_create_datetime
             var depart = $(rowData[0]).text(); // แผนก
@@ -924,6 +945,8 @@ if (count($result) > 0) {
                             userCode: userCode,
                             name: name,
                             leaveStatus: leaveStatus,
+                            level: level,
+                            workplace: workplace,
                             action: 'approve'
                         },
                         success: function(response) {
@@ -962,6 +985,8 @@ if (count($result) > 0) {
                             userCode: userCode,
                             name: name,
                             leaveStatus: leaveStatus,
+                            level: level,
+                            workplace: workplace,
                             action: 'deny'
                         },
                         success: function(response) {

@@ -25,6 +25,7 @@ if ($status == '4') {
     // เตรียมคำสั่ง SQL
     $sql = "UPDATE leave_list SET l_approve_status2 = :status, l_approve_datetime2 = :appDate, l_approve_name2 = :userName
             WHERE l_usercode = :userCode AND l_create_datetime = :createDate";
+
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':status', $status);
     $stmt->bindParam(':appDate', $appDate);
@@ -44,7 +45,7 @@ if ($status == '4') {
         $message = "$proveName อนุมัติใบลา \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
         if ($leaveStatus == 'ยกเลิกใบลา') {
-            $message = " $proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
         }
 
         // ส่ง LINE Notify ไปยังพนักงาน
@@ -79,7 +80,9 @@ if ($status == '4') {
         $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
         if ($leaveStatus == 'ยกเลิกใบลา') {
-            $adminMessage = "$empName ยกเลิกใบลา\n$proveName อนุมัติยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $adminMessage = "$empName ยกเลิกใบลา\n$proveName อนุมัติยกเลิกใบลาของ\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        } else {
+            $adminMessage = "$proveName อนุมัติใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
         }
 
         foreach ($adminTokens as $sToken) {
@@ -92,6 +95,36 @@ if ($status == '4') {
             $headers = array(
                 'Content-type: application/x-www-form-urlencoded',
                 'Authorization: Bearer ' . $sToken,
+            );
+            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+            $result = curl_exec($chOne);
+
+            if (curl_error($chOne)) {
+                echo 'Error:' . curl_error($chOne);
+            } else {
+                $result_ = json_decode($result, true);
+                echo "status : " . $result_['status'] . "\n";
+                echo "message : " . $result_['message'] . "\n";
+            }
+            curl_close($chOne);
+        }
+
+        // แจ้งเตือนผู้จัดการ
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'manager' AND e_sub_department = 'All'");
+        $stmt->execute();
+        $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ($managerTokens as $managerToken) {
+            $chOne = curl_init();
+            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($chOne, CURLOPT_POST, 1);
+            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+            $headers = array(
+                'Content-type: application/x-www-form-urlencoded',
+                'Authorization: Bearer ' . $managerToken,
             );
             curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);

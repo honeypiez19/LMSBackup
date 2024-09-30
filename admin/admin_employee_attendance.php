@@ -95,11 +95,16 @@ while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                                 <input type="text" class="form-control" id="telPhone" name="telPhone" hidden>
                                 <input type="text" class="form-control" id="reason" name="reason" value="มาสาย" hidden>
                                 <input type="text" class="form-control" id="workplace" name="workplace" hidden>
-                                <input type="text" class="form-control" id="subDeart" name="subDeart" hidden>
-                                <input type="text" class="form-control" id="subDeart2" name="subDeart2" hidden>
-                                <input type="text" class="form-control" id="subDeart3" name="subDeart3" hidden>
-                                <input type="text" class="form-control" id="subDeart4" name="subDeart4" hidden>
-                                <input type="text" class="form-control" id="subDeart5" name="subDeart5" hidden>
+                                <input type="text" class="form-control" id="subDepart" name="subDepart" hidden>
+                                <!-- Correct subDepart -->
+                                <input type="text" class="form-control" id="subDepart2" name="subDepart2" hidden>
+                                <!-- Correct subDepart2 -->
+                                <input type="text" class="form-control" id="subDepart3" name="subDepart3" hidden>
+                                <!-- Correct subDepart3 -->
+                                <input type="text" class="form-control" id="subDepart4" name="subDepart4" hidden>
+                                <!-- Correct subDepart4 -->
+                                <input type="text" class="form-control" id="subDepart5" name="subDepart5" hidden>
+                                <!-- Correct subDepart5 -->
 
                             </div>
                         </div>
@@ -228,7 +233,10 @@ if (!isset($_GET['page'])) {
 
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
 // $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 ORDER BY l_create_datetime DESC";
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 AND Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear ORDER BY l_create_datetime DESC";
+$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7
+AND Month(l_create_datetime) = '$selectedMonth'
+AND Year(l_create_datetime) = $selectedYear
+ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -516,7 +524,10 @@ if (!isset($_GET['page'])) {
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
 // $sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 ORDER BY l_create_datetime DESC";
-$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 AND Month(l_create_datetime) = '$selectedMonth' AND Year(l_create_datetime) = $selectedYear  ORDER BY l_create_datetime DESC";
+$sql = "SELECT * FROM leave_list WHERE l_leave_id = 7 
+AND Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = $selectedYear 
+ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -991,10 +1002,9 @@ if (count($currentResults) > 0) {
             // const subDeart4 = $('#subDeart4').val();
             // const subDeart5 = $('#subDeart5').val();
 
-
             var addName = '<?php echo $userName; ?>';
 
-            // alert(userCode)
+            alert(subDepart)
             formData.append('userCode', userCode);
             formData.append('userName', userName);
             formData.append('name', name);
@@ -1253,16 +1263,21 @@ if (count($currentResults) > 0) {
                 document.getElementById('level').value = dataList[i].getAttribute('data-level');
                 document.getElementById('telPhone').value = dataList[i].getAttribute('data-telPhone');
                 document.getElementById('workplace').value = dataList[i].getAttribute('data-workplace');
-                document.getElementById('subDeart').value = dataList[i].getAttribute('data-sub-department');
-                document.getElementById('subDeart2').value = dataList[i].getAttribute('data-sub-department2');
-                document.getElementById('subDeart3').value = dataList[i].getAttribute('data-sub-department3');
-                document.getElementById('subDeart4').value = dataList[i].getAttribute('data-sub-department4');
-                document.getElementById('subDeart5').value = dataList[i].getAttribute('data-sub-department5');
-
+                document.getElementById('subDepart').value = dataList[i].getAttribute(
+                    'data-sub-department'); // Correct subDepart
+                document.getElementById('subDepart2').value = dataList[i].getAttribute(
+                    'data-sub-department2'); // Correct subDepart2
+                document.getElementById('subDepart3').value = dataList[i].getAttribute(
+                    'data-sub-department3'); // Correct subDepart3
+                document.getElementById('subDepart4').value = dataList[i].getAttribute(
+                    'data-sub-department4'); // Correct subDepart4
+                document.getElementById('subDepart5').value = dataList[i].getAttribute(
+                    'data-sub-department5'); // Correct subDepart5
                 break;
             }
         }
     });
+
 
     document.getElementById('codeSearch').addEventListener('change', function() {
         if (this.value === '') {
