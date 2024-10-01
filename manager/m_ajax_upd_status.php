@@ -20,6 +20,7 @@ $leaveStartDate = $_POST['leaveStartDate'];
 $leaveEndDate = $_POST['leaveEndDate'];
 $depart = $_POST['depart'];
 $leaveStatus = $_POST['leaveStatus'];
+$subDepart = $_POST['subDepart'];
 
 if ($status == '4') {
     // เตรียมคำสั่ง SQL
@@ -42,7 +43,7 @@ if ($status == '4') {
         $sURL = 'https://lms.system-samt.com/';
 
         // ข้อความแจ้งเตือน
-        $message = "$proveName อนุมัติใบลา \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+        $message = "$proveName อนุมัติใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
         if ($leaveStatus == 'ยกเลิกใบลา') {
             $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
@@ -75,74 +76,153 @@ if ($status == '4') {
         }
 
         // แจ้งเตือน HR
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
-        $stmt->execute();
-        $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+        // $stmt->execute();
+        // $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        if ($leaveStatus == 'ยกเลิกใบลา') {
-            $adminMessage = "$empName ยกเลิกใบลา\n$proveName อนุมัติยกเลิกใบลาของ\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        } else {
-            $adminMessage = "$proveName อนุมัติใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        }
+        // foreach ($adminTokens as $adminToken) {
+        //     $chOne = curl_init();
+        //     curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+        //     curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+        //     curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+        //     curl_setopt($chOne, CURLOPT_POST, 1);
+        //     curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+        //     $headers = array(
+        //         'Content-type: application/x-www-form-urlencoded',
+        //         'Authorization: Bearer ' . $adminToken,
+        //     );
+        //     curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+        //     curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+        //     $result = curl_exec($chOne);
 
-        foreach ($adminTokens as $sToken) {
-            $chOne = curl_init();
-            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($adminMessage));
-            $headers = array(
-                'Content-type: application/x-www-form-urlencoded',
-                'Authorization: Bearer ' . $sToken,
-            );
-            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-            $result = curl_exec($chOne);
+        //     if (curl_error($chOne)) {
+        //         echo 'Error:' . curl_error($chOne);
+        //     } else {
+        //         $result_ = json_decode($result, true);
+        //         echo "status : " . $result_['status'] . "\n";
+        //         echo "message : " . $result_['message'] . "\n";
+        //     }
+        //     curl_close($chOne);
+        // }
 
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
-            } else {
-                $result_ = json_decode($result, true);
-                echo "status : " . $result_['status'] . "\n";
-                echo "message : " . $result_['message'] . "\n";
+        // ตรวจสอบ $proveName แล้วส่งการแจ้งเตือน
+        if ($userName == 'Anchana') {
+            // แจ้งเตือน Pornsuk
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Pornsuk'");
+            $stmt->execute();
+            $pornsukToken = $stmt->fetchColumn();
+
+            // $pornsukMess = "K.PS";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            $message = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
             }
-            curl_close($chOne);
-        }
 
-        // แจ้งเตือน K. พรสุข
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'manager' AND e_sub_department = 'All'");
-        $stmt->execute();
-        $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            if ($pornsukToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $pornsukToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
 
-        foreach ($managerTokens as $managerToken) {
-            $chOne = curl_init();
-            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
-            $headers = array(
-                'Content-type: application/x-www-form-urlencoded',
-                'Authorization: Bearer ' . $managerToken,
-            );
-            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-            $result = curl_exec($chOne);
-
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
-            } else {
-                $result_ = json_decode($result, true);
-                echo "status : " . $result_['status'] . "\n";
-                echo "message : " . $result_['message'] . "\n";
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
             }
-            curl_close($chOne);
-        }
+        } elseif ($userName == 'Pornsuk') {
+            // แจ้งเตือน Anchana
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+            $stmt->execute();
+            $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        echo "อัปเดตสถานะผ่านสำเร็จ";
-    } else {
-        echo 'อัปเดตสถานะผ่านไม่สำเร็จ';
+            // $adminMess = "admin";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $message = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            }
+
+            foreach ($adminTokens as $adminToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $adminToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
+            }
+
+        } else if ($userName == 'Horita') {
+            // แจ้งเตือน Pornsuk
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
+            $stmt->execute();
+            $pornsukToken = $stmt->fetchColumn();
+
+            // $pornsukMess = "K.PS";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $message = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            }
+
+            if ($pornsukToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $pornsukToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
+            }
+        }
     }
 } else if ($status == '5') {
     $sql = "UPDATE leave_list SET l_approve_status2 = :status, l_approve_datetime2 = :appDate, l_approve_name2 = :userName
@@ -195,76 +275,124 @@ if ($status == '4') {
             curl_close($chOne);
         }
 
-        // แจ้งเตือน HR
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
-        $stmt->execute();
-        $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        // ตรวจสอบ $proveName แล้วส่งการแจ้งเตือน
+        if ($userName == 'Anchana') {
+            // แจ้งเตือน Pornsuk
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Pornsuk'");
+            $stmt->execute();
+            $pornsukToken = $stmt->fetchColumn();
 
-        if ($leaveStatus == 'ยกเลิกใบลา') {
-            $adminMessage = "$empName ยกเลิกใบลา\n$proveName ไม่อนุมัติยกเลิกใบลา\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        }
+            // $pornsukMess = "K.PS";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-        foreach ($adminTokens as $sToken) {
-            $chOne = curl_init();
-            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($adminMessage));
-            $headers = array(
-                'Content-type: application/x-www-form-urlencoded',
-                'Authorization: Bearer ' . $sToken,
-            );
-            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-            $result = curl_exec($chOne);
+            $message = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
 
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
-            } else {
-                $result_ = json_decode($result, true);
-                echo "status : " . $result_['status'] . "\n";
-                echo "message : " . $result_['message'] . "\n";
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
             }
-            curl_close($chOne);
-        }
 
-        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'manager' AND e_sub_department = 'All'");
-        $stmt->execute();
-        $managerTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            if ($pornsukToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $pornsukToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
 
-        $message = "$proveName ไม่อนุมัติใบลา \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-
-        if ($leaveStatus == 'ยกเลิกใบลา') {
-            $message = " $proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
-        }
-
-        foreach ($managerTokens as $managerToken) {
-            $chOne = curl_init();
-            curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($chOne, CURLOPT_POST, 1);
-            curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
-            $headers = array(
-                'Content-type: application/x-www-form-urlencoded',
-                'Authorization: Bearer ' . $managerToken,
-            );
-            curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-            $result = curl_exec($chOne);
-
-            if (curl_error($chOne)) {
-                echo 'Error:' . curl_error($chOne);
-            } else {
-                $result_ = json_decode($result, true);
-                echo "status : " . $result_['status'] . "\n";
-                echo "message : " . $result_['message'] . "\n";
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
             }
-            curl_close($chOne);
-        }
+        } elseif ($userName == 'Pornsuk') {
+            // แจ้งเตือน Anchana
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+            $stmt->execute();
+            $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        echo "อัปเดตสถานะผ่านสำเร็จ";
+            // $adminMess = "admin";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $message = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            }
+
+            foreach ($adminTokens as $adminToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $adminToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
+            }
+
+        } else if ($userName == 'Horita') {
+            // แจ้งเตือน Pornsuk
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
+            $stmt->execute();
+            $pornsukToken = $stmt->fetchColumn();
+
+            // $pornsukMess = "K.PS";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $message = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            }
+
+            if ($pornsukToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $pornsukToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
+            }
+        }
     } else {
         echo 'อัปเดตสถานะผ่านไม่สำเร็จ';
     }

@@ -103,34 +103,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             echo "ไม่พบ Token ของพนักงาน";
         }
-        
-         // แจ้งเตือน Admin
-         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
-         $stmt->execute();
-         $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
- 
-         if ($admins) {
-             foreach ($admins as $admin) {
-                 $sToken = $admin['e_token'];
-                 $chOne = curl_init();
-                 curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-                 curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-                 curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-                 curl_setopt($chOne, CURLOPT_POST, 1);
-                 curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
-                 $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken);
-                 curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-                 curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-                 $result = curl_exec($chOne);
- 
-                 if (curl_error($chOne)) {
-                     echo 'Error:' . curl_error($chOne);
-                 }
-                 curl_close($chOne);
-             }
-         } else {
-             echo "ไม่พบ Token ของแอดมิน";
-         }
+
+        // แจ้งเตือน Admin
+        $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+        $stmt->execute();
+        $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($admins) {
+            foreach ($admins as $admin) {
+                $sToken = $admin['e_token'];
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . $sMessage);
+                $headers = array('Content-type: application/x-www-form-urlencoded', 'Authorization: Bearer ' . $sToken);
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                }
+                curl_close($chOne);
+            }
+        } else {
+            echo "ไม่พบ Token ของแอดมิน";
+        }
     } else {
         echo 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล';
     }

@@ -38,8 +38,7 @@ $userCode = $_SESSION['s_usercode'];
 <body>
     <?php include 'manager_navbar.php'?>
 
-
-    <!-- <?php echo $depart; ?> -->
+    <?php echo $subDepart; ?>
     <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">
         <div class="container-fluid">
@@ -268,9 +267,21 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-$sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
-AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
-AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
+// $sql = "SELECT * FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
+// AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
+// AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
+
+$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
+    AND Year(l_create_datetime) = '$selectedYear'
+    AND Month(l_create_datetime) = '$selectedMonth'
+    -- AND l_level = 'user'
+    AND l_leave_id <> 6
+    AND l_leave_id <> 7
+ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -494,58 +505,6 @@ if ($result->rowCount() > 0) {
 
         echo '</tr>';
 
-        // $accessToken = 'nqfsvavrOb6KwxeK666SINY6Z7u80WOI6DdzlCh6nK6';
-        // $apiUrl = 'https://notify-api.line.me/api/notify';
-        // $file = 'notification_sent.txt';
-        // $today = new DateTime();
-
-        // // อ่านข้อมูลพนักงานที่ถูกส่งแจ้งเตือนไปแล้วจากไฟล์
-        // $sentNotifications = file_exists($file) ? file($file, FILE_IGNORE_NEW_LINES) : [];
-
-        // // ดึงข้อมูลการลา
-        // $sql = "SELECT l_leave_start_date, l_name, l_leave_id FROM leave_list";
-        // $stmt = $conn->prepare($sql);
-        // $stmt->execute();
-        // $leaveRecords = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // // ประมวลผลข้อมูลการลา
-        // foreach ($leaveRecords as $row) {
-        //     $startDate = $row['l_leave_start_date'];
-        //     $nameEmp = $row['l_name'];
-        //     $leaveType = $row['l_leave_id'];
-        //     $leaveDate = new DateTime($startDate);
-        //     $interval = $today->diff($leaveDate);
-
-        //     // ตรวจสอบว่าเป็นการลาในอีก 2 วัน และยังไม่ได้ส่งแจ้งเตือน
-        //     if ($interval->days == 2 && $interval->invert == 0 && !in_array($nameEmp, $sentNotifications)) {
-        //         $message = $nameEmp . ' การลาในวันที่ ' . $startDate . ' ประเภท: ' . $leaveType . ' ยังไม่ได้รับการอนุมัติ';
-
-        //         $data = array('message' => $message);
-
-        //         $ch = curl_init();
-        //         curl_setopt($ch, CURLOPT_URL, $apiUrl);
-        //         curl_setopt($ch, CURLOPT_POST, 1);
-        //         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-        //         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Authorization: Bearer ' . $accessToken));
-        //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        //         $response = curl_exec($ch);
-        //         $error = curl_error($ch);
-        //         curl_close($ch);
-
-        //         if ($error) {
-        //             echo 'cURL Error: ' . $error;
-        //         } else {
-        //             echo 'Notification sent for: ' . $nameEmp . ' on ' . $startDate . '<br>';
-
-        //             // บันทึกการแจ้งเตือนที่ส่งไปแล้วลงในไฟล์
-        //             file_put_contents($file, $nameEmp . PHP_EOL, FILE_APPEND);
-        //         }
-
-        //         // ไม่จำเป็นต้องออกจากลูป เพราะเราต้องการเช็คพนักงานทุกคน
-        //     }
-        // }
-
         $rowNumber--;
     }
 
@@ -675,7 +634,9 @@ echo '</div>';
             var status = '4'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var subDepart = '<?php echo $subDepart; ?>';
 
+            // alert(userName)
             $.ajax({
                 url: 'm_ajax_upd_status.php',
                 method: 'POST',
@@ -691,7 +652,8 @@ echo '</div>';
                     leaveEndDate: leaveEndDate,
                     depart: depart,
                     empName: empName,
-                    leaveStatus: leaveStatus
+                    leaveStatus: leaveStatus,
+                    subDepart: subDepart
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
@@ -1113,10 +1075,12 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-                                var status = '2'; // อนุมัติ
+                                var status = '4'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
+                                var subDepart = '<?php echo $subDepart; ?>';
 
+                                alert(subDepart)
                                 $.ajax({
                                     url: 'c_ajax_upd_status.php',
                                     method: 'POST',
