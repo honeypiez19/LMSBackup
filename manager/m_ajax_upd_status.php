@@ -35,7 +35,6 @@ if ($status == '4') {
     $stmt->bindParam(':createDate', $createDate);
 
     if ($stmt->execute()) {
-        // ดึง token พนักงาน
         $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_usercode = :usercode");
         $stmt->bindParam(':usercode', $userCode);
         $stmt->execute();
@@ -49,7 +48,7 @@ if ($status == '4') {
             $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
         }
 
-        // ส่ง LINE Notify ไปยังพนักงาน
+        // แจ้งเตือน พนง
         if ($sToken) {
             $chOne = curl_init();
             curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
@@ -75,37 +74,6 @@ if ($status == '4') {
             curl_close($chOne);
         }
 
-        // แจ้งเตือน HR
-        // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
-        // $stmt->execute();
-        // $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        // foreach ($adminTokens as $adminToken) {
-        //     $chOne = curl_init();
-        //     curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
-        //     curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
-        //     curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
-        //     curl_setopt($chOne, CURLOPT_POST, 1);
-        //     curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
-        //     $headers = array(
-        //         'Content-type: application/x-www-form-urlencoded',
-        //         'Authorization: Bearer ' . $adminToken,
-        //     );
-        //     curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
-        //     curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
-        //     $result = curl_exec($chOne);
-
-        //     if (curl_error($chOne)) {
-        //         echo 'Error:' . curl_error($chOne);
-        //     } else {
-        //         $result_ = json_decode($result, true);
-        //         echo "status : " . $result_['status'] . "\n";
-        //         echo "message : " . $result_['message'] . "\n";
-        //     }
-        //     curl_close($chOne);
-        // }
-
-        // ตรวจสอบ $proveName แล้วส่งการแจ้งเตือน
         if ($userName == 'Anchana') {
             // แจ้งเตือน Pornsuk
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Pornsuk'");
