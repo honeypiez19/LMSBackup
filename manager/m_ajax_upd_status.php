@@ -113,6 +113,7 @@ if ($status == '4') {
                 }
                 curl_close($chOne);
             }
+<<<<<<< HEAD
         } else if ($userName == 'Horita') {
             // แจ้งเตือน Pornsuk
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
@@ -157,6 +158,14 @@ if ($status == '4') {
             $stmt->execute();
             $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
+=======
+        } elseif ($userName == 'Pornsuk') {
+            // แจ้งเตือน Anchana
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+            $stmt->execute();
+            $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
             // $adminMess = "admin";
             // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
             $message = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
@@ -190,6 +199,47 @@ if ($status == '4') {
                 curl_close($chOne);
             }
 
+<<<<<<< HEAD
+=======
+        } else if ($userName == 'Horita') {
+            // แจ้งเตือน Pornsuk
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
+            $stmt->execute();
+            $pornsukToken = $stmt->fetchColumn();
+
+            // $pornsukMess = "K.PS";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $message = "มีใบลาของ $empName\n$proveName อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            }
+
+            if ($pornsukToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $pornsukToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
+            }
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
         }
     }
 } else if ($status == '5') {
@@ -283,6 +333,7 @@ if ($status == '4') {
                 }
                 curl_close($chOne);
             }
+<<<<<<< HEAD
         } else if ($userName == 'Horita') {
             // แจ้งเตือน Pornsuk
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
@@ -327,6 +378,14 @@ if ($status == '4') {
             $stmt->execute();
             $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
+=======
+        } elseif ($userName == 'Pornsuk') {
+            // แจ้งเตือน Anchana
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
+            $stmt->execute();
+            $adminTokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
             // $adminMess = "admin";
             // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
             $message = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
@@ -360,6 +419,47 @@ if ($status == '4') {
                 curl_close($chOne);
             }
 
+<<<<<<< HEAD
+=======
+        } else if ($userName == 'Horita') {
+            // แจ้งเตือน Pornsuk
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
+            $stmt->execute();
+            $pornsukToken = $stmt->fetchColumn();
+
+            // $pornsukMess = "K.PS";
+            // $message = "$proveName อนุมัติใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            $message = "มีใบลาของ $empName\n$proveName ไม่อนุมัติใบลาเรียบร้อย \nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+
+            if ($leaveStatus == 'ยกเลิกใบลา') {
+                $message = "$proveName ไม่อนุมัติยกเลิกใบลาของ $empName\nประเภทการลา : $leaveType\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveStartDate ถึง $leaveEndDate\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด $sURL";
+            }
+
+            if ($pornsukToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($message));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $pornsukToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
+            }
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
         }
     } else {
         echo 'อัปเดตสถานะผ่านไม่สำเร็จ';

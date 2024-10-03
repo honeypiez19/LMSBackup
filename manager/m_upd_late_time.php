@@ -112,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 curl_close($chOne);
             }
+<<<<<<< HEAD
         } else if ($userName == 'Horita') {
             // แจ้งเตือน Pornsuk
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
@@ -146,6 +147,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 curl_close($chOne);
             }
         } elseif ($userName == 'Pornsuk' || $userName == 'Matsumoto') {
+=======
+        }
+        elseif ($userName == 'Pornsuk') {
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
             // แจ้งเตือน Anchana
             $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_level = 'admin'");
             $stmt->execute();
@@ -179,7 +184,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 curl_close($chOne);
             }
 
+<<<<<<< HEAD
         }
+=======
+        } else if ($userName == 'Horita') {
+            // แจ้งเตือน Pornsuk
+            $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_username = 'Matsumoto'");
+            $stmt->execute();
+            $pornsukToken = $stmt->fetchColumn();
+
+            // $pornsukMess = "K.PS";
+            $sMessage = "$message ของ $name\nวันที่มาสาย : $lateDate\nเวลาที่มาสาย : $lateStart ถึง $lateEnd\nสถานะรายการ : $leaveStatus\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด: $sURL";
+
+            if ($pornsukToken) {
+                $chOne = curl_init();
+                curl_setopt($chOne, CURLOPT_URL, "https://notify-api.line.me/api/notify");
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYHOST, 0);
+                curl_setopt($chOne, CURLOPT_SSL_VERIFYPEER, 0);
+                curl_setopt($chOne, CURLOPT_POST, 1);
+                curl_setopt($chOne, CURLOPT_POSTFIELDS, "message=" . urlencode($sMessage));
+                $headers = array(
+                    'Content-type: application/x-www-form-urlencoded',
+                    'Authorization: Bearer ' . $pornsukToken,
+                );
+                curl_setopt($chOne, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($chOne, CURLOPT_RETURNTRANSFER, 1);
+                $result = curl_exec($chOne);
+
+                if (curl_error($chOne)) {
+                    echo 'Error:' . curl_error($chOne);
+                } else {
+                    $result_ = json_decode($result, true);
+                    echo "status : " . $result_['status'] . "\n";
+                    echo "message : " . $result_['message'] . "\n";
+                }
+                curl_close($chOne);
+            }
+        }
+
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
     } else {
         echo 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล';
     }

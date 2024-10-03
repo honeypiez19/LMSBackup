@@ -39,9 +39,12 @@ $userCode = $_SESSION['s_usercode'];
     <?php include 'manager_navbar.php'?>
 
     <?php echo $subDepart; ?>
+<<<<<<< HEAD
     <?php echo $subDepart2; ?>
     <?php echo $userName; ?>
 
+=======
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
     <nav class="navbar bg-body-tertiary" style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   border: none;">
         <div class="container-fluid">
@@ -384,6 +387,7 @@ if (!isset($_GET['page'])) {
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = 'Office'
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
+<<<<<<< HEAD
 $sql = "SELECT
     li.*,
     em.e_username,
@@ -409,6 +413,18 @@ WHERE
         OR em.e_sub_department4 = '$subDepart4'
         OR em.e_sub_department5 = '$subDepart5'
     )
+=======
+$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
+    AND (em.e_department = '$subDepart' OR '$subDepart' = 'All' OR '$subDepart' = 'RD')
+    AND Year(l_create_datetime) = '$selectedYear'
+    AND Month(l_create_datetime) = '$selectedMonth'
+    -- AND l_level = 'user'
+    AND l_leave_id <> 6
+    AND l_leave_id <> 7
+>>>>>>> f4b64c4c67055d083280d8a7777b5c50acbc3059
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
