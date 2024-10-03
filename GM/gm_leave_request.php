@@ -126,29 +126,12 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
-em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
-em.e_sub_department4,
-em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-  AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems 
+FROM leave_list
+WHERE l_leave_id NOT IN (6,7) 
+AND l_department <> 'RD'";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
+
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -183,29 +166,11 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
 //         (em.e_username IN ('Kiyoka', 'Matsumoto') AND em.e_department = 'RD')
 //         OR em.e_username NOT IN ('Kiyoka', 'Matsumoto')
 //     )
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
-em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
-em.e_sub_department4,
-em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
-AND li.l_approve_status2 = 1";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems
+FROM leave_list
+WHERE l_leave_id NOT IN (6,7) 
+AND l_department <> 'RD'
+AND l_approve_status2 = 1";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -240,29 +205,11 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
 //         (em.e_username IN ('Kiyoka', 'Matsumoto') AND em.e_department = 'RD')
 //         OR em.e_username NOT IN ('Kiyoka', 'Matsumoto')
 //     )
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
-em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
-em.e_sub_department4,
-em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
-AND li.l_approve_status2 = 4";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems
+FROM leave_list
+WHERE l_leave_id NOT IN (6,7) 
+AND l_department <> 'RD'
+AND l_approve_status2 = 4";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -297,29 +244,11 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
 //         (em.e_username IN ('Kiyoka', 'Matsumoto') AND em.e_department = 'RD')
 //         OR em.e_username NOT IN ('Kiyoka', 'Matsumoto')
 //     )
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems,
-em.e_sub_department,
-em.e_sub_department2 ,
-em.e_sub_department3 ,
-em.e_sub_department4,
-em.e_sub_department5
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    Year(l_create_datetime) = '$selectedYear'
-    AND Month(l_create_datetime) = '$selectedMonth'
-    AND l_level <> 'manager'
-    AND li.l_leave_id NOT IN (6,7)
-    AND (
-        li.l_department = '$subDepart'
-        OR em.e_sub_department = '$subDepart'
-        OR em.e_sub_department2 = '$subDepart2'
-        OR em.e_sub_department3 = '$subDepart3'
-        OR em.e_sub_department4 = '$subDepart4'
-        OR em.e_sub_department5 = '$subDepart5'
-    )
-AND li.l_approve_status2 = 5";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems
+FROM leave_list
+WHERE l_leave_id NOT IN (6,7) 
+AND l_department <> 'RD'
+AND l_approve_status2 = 5";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">

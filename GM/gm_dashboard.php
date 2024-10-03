@@ -105,7 +105,7 @@ if (!empty($employee_list)) {
     echo '<div class="alert alert-warning d-flex align-items-center" role="alert">
     <i class="fa-solid fa-circle-exclamation me-2"></i>
     <span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
+    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'gm_leave_request.php\'">ตรวจสอบใบลา</button>
     <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
@@ -136,7 +136,7 @@ if (!empty($employee_list)) {
     echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
 <i class="fa-solid fa-circle-exclamation me-2"></i>
 <span>มีการยกเลิกใบลาของ ' . $employee_list . ' กรุณาตรวจสอบ</span>
-<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'gm_leave_request.php\'">ตรวจสอบใบลา</button>
 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
@@ -165,7 +165,7 @@ if ($stmt_check_leave_id_7->rowCount() > 0) {
     echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
 <i class="fa-solid fa-circle-exclamation me-2"></i>
 <span> ' . $employee_list_id_7 . ' มาสาย' . ' กรุณาตรวจสอบ</span>
-<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_employee_attendance.php\'">ตรวจสอบการมาสาย</button>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'gm_employee_attendance.php\'">ตรวจสอบการมาสาย</button>
 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
@@ -230,7 +230,7 @@ if ($sum_day >= 10) {
     echo '<div class="alert d-flex align-items-center" role="alert"  style="background-color: #FFCC66; border: 1px solid #FF9933;">
     <i class="fa-solid fa-chart-line me-2"></i>
     <span>รวมวันลาที่ใช้ไปทั้งหมด : ' . $sum_day . ' วัน</span>
-    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave.php\'">สถิติการลาและมาสาย</button>
+    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'gm_leave.php\'">สถิติการลาและมาสาย</button>
     <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
