@@ -45,20 +45,20 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php include 'admin_navbar.php'?>
+    <?php include 'gm_navbar.php'?>
 
     <?php
-// echo $depart;
-// echo $subDepart;
 // มาสาย --------------------------------------------------------------------------------------------
 $sql_check_late = "SELECT l_leave_start_date, l_leave_start_time, l_leave_end_time
 FROM leave_list
-WHERE l_usercode = :userCode
-AND l_level = 'user'
-AND l_late_datetime IS NULL
+WHERE l_department = :depart
+AND l_leave_status = 0
+AND l_approve_status2 = 1
+AND l_level = 'manager'
+-- AND l_approve_status2 = 1
 AND l_leave_id = 7";
 $stmt_check_late = $conn->prepare($sql_check_late);
-$stmt_check_late->bindParam(':userCode', $userCode);
+$stmt_check_late->bindParam(':depart', $depart);
 $stmt_check_late->execute();
 
 $late_entries = array();
@@ -78,7 +78,165 @@ if (!empty($late_entries_list)) {
 <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
 }
+
+// มีใบลาของพนักงาน --------------------------------------------------------------------------------------------
+$sql_check_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
+FROM leave_list
+WHERE
+l_department = 'Office'
+AND l_approve_status = 2
+AND l_level IN ('user','chief')
+AND l_approve_status2 = 1
+AND (l_leave_id <> 6 AND l_leave_id <> 7)
+AND l_leave_status = 0
+GROUP BY l_name";
+$stmt_check_leave = $conn->prepare($sql_check_leave);
+$stmt_check_leave->bindParam(':depart', $depart);
+$stmt_check_leave->execute();
+
+$employee_names = array();
+while ($row_leave = $stmt_check_leave->fetch(PDO::FETCH_ASSOC)) {
+    $employee_names[] = $row_leave['l_name'];
+}
+
+$employee_list = implode(', ', $employee_names);
+
+if (!empty($employee_list)) {
+    echo '<div class="alert alert-warning d-flex align-items-center" role="alert">
+    <i class="fa-solid fa-circle-exclamation me-2"></i>
+    <span>มีใบลาของพนักงาน ' . $employee_list . ' กรุณาตรวจสอบ</span>
+    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+}
+
+// พนักงานยกเลิกใบลา --------------------------------------------------------------------------------------------
+$sql_cancel_leave = "SELECT COUNT(l_list_id) AS leave_count, l_name
+FROM leave_list
+WHERE
+l_department = 'Office'
+AND l_approve_status = 2
+AND l_level IN ('user','chief')
+AND l_approve_status2 = 1
+AND (l_leave_id <> 6 AND l_leave_id <> 7)
+AND l_leave_status = 1
+GROUP BY l_name";
+$stmt_cancel_leave = $conn->prepare($sql_cancel_leave);
+$stmt_cancel_leave->bindParam(':depart', $depart);
+$stmt_cancel_leave->execute();
+
+$employee_names = array();
+while ($row_leave = $stmt_cancel_leave->fetch(PDO::FETCH_ASSOC)) {
+    $employee_names[] = $row_leave['l_name'];
+}
+
+$employee_list = implode(', ', $employee_names);
+
+if (!empty($employee_list)) {
+    echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
+<i class="fa-solid fa-circle-exclamation me-2"></i>
+<span>มีการยกเลิกใบลาของ ' . $employee_list . ' กรุณาตรวจสอบ</span>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave_request.php\'">ตรวจสอบใบลา</button>
+<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+}
+
+// มีพนักงานมาสาย --------------------------------------------------------------------------------------------
+$sql_check_leave_id_7 = "SELECT COUNT(l_list_id) AS leave_count, l_name
+FROM leave_list
+WHERE l_department = 'Office'
+AND l_leave_id = 7
+AND l_approve_status = 2
+OR  l_approve_status = 6
+AND l_approve_status2 = 1
+GROUP BY l_name";
+$stmt_check_leave_id_7 = $conn->prepare($sql_check_leave_id_7);
+$stmt_check_leave_id_7->bindParam(':depart', $depart);
+$stmt_check_leave_id_7->execute();
+
+if ($stmt_check_leave_id_7->rowCount() > 0) {
+    $employee_names_id_7 = array();
+    while ($row_leave_id_7 = $stmt_check_leave_id_7->fetch(PDO::FETCH_ASSOC)) {
+        $employee_names_id_7[] = $row_leave_id_7['l_name'];
+    }
+
+    $employee_list_id_7 = implode(', ', $employee_names_id_7);
+
+    echo '<div class="alert alert-danger d-flex align-items-center" role="alert">
+<i class="fa-solid fa-circle-exclamation me-2"></i>
+<span> ' . $employee_list_id_7 . ' มาสาย' . ' กรุณาตรวจสอบ</span>
+<button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_employee_attendance.php\'">ตรวจสอบการมาสาย</button>
+<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+}
+
+// รวมสถิติการลาและมาสายของตัวเอง --------------------------------------------------------------------------------------------
+$sql_leave = "SELECT
+    SUM(
+        CASE
+            WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
+                CASE
+                    WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) = 8 * 3600 + 40 * 60 THEN 8
+                    WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) > 4 * 3600 THEN
+                        ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 1 * 3600) / 3600, 1)
+                    ELSE
+                        ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
+                END
+            ELSE
+                (DATEDIFF(l_leave_end_date, l_leave_start_date) * 8) +
+                CASE
+                    WHEN TIME(l_leave_end_time) <= '11:45:00' THEN 4
+                    ELSE 8
+                END
+        END
+    ) AS leave_days,
+    SUM(CASE WHEN l_leave_id = 1 THEN 1 ELSE 0 END) AS leave_personal,
+    SUM(CASE WHEN l_leave_id = 2 THEN 1 ELSE 0 END) AS leave_personal_no,
+    SUM(CASE WHEN l_leave_id = 3 THEN 1 ELSE 0 END) AS leave_sick,
+    SUM(CASE WHEN l_leave_id = 4 THEN 1 ELSE 0 END) AS leave_sick_work,
+    SUM(CASE WHEN l_leave_id = 5 THEN 1 ELSE 0 END) AS leave_annual,
+    SUM(CASE WHEN l_leave_id = 6 THEN 1 ELSE 0 END) AS stop_work,
+    SUM(CASE WHEN l_leave_id = 8 THEN 1 ELSE 0 END) AS other_leave
+FROM leave_list
+WHERE l_usercode = :userCode
+AND NOT (TIME(l_leave_start_time) >= '11:45:00' AND TIME(l_leave_end_time) <= '12:45:00')
+AND YEAR(l_create_datetime) = :selectedYear
+AND l_leave_status = 0";
+
+// Prepare and execute statement
+$stmt_leave = $conn->prepare($sql_leave);
+$stmt_leave->bindParam(':userCode', $row['e_usercode']);
+$stmt_leave->bindParam(':selectedYear', $selectedYear);
+$stmt_leave->execute();
+$result_leave = $stmt_leave->fetch(PDO::FETCH_ASSOC);
+
+// Retrieve leave counts
+$leave_personal_days = floor($result_leave['leave_personal'] * 8 / 8);
+$leave_personal_no_days = floor($result_leave['leave_personal_no'] * 8 / 8);
+$leave_sick_days = floor($result_leave['leave_sick'] * 8 / 8);
+$leave_sick_work_days = floor($result_leave['leave_sick_work'] * 8 / 8);
+$leave_annual_days = floor($result_leave['leave_annual'] * 8 / 8);
+$other_days = floor($result_leave['other_leave'] * 8 / 8);
+$stop_work = $result_leave['stop_work'];
+
+// Calculate stop work days
+// $stop_work = floor($late_count / 3);
+
+// Calculate total leave days
+$sum_day = $leave_personal_days + $leave_personal_no_days + $leave_sick_days + $leave_sick_work_days + $leave_annual_days + $other_days + $stop_work;
+
+// Display alert with total leave days
+if ($sum_day >= 10) {
+    echo '<div class="alert d-flex align-items-center" role="alert"  style="background-color: #FFCC66; border: 1px solid #FF9933;">
+    <i class="fa-solid fa-chart-line me-2"></i>
+    <span>รวมวันลาที่ใช้ไปทั้งหมด : ' . $sum_day . ' วัน</span>
+    <button type="button" class="ms-2 btn btn-primary button-shadow" onclick="window.location.href=\'manager_leave.php\'">สถิติการลาและมาสาย</button>
+    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+}
+
 ?>
+
     <div class="mt-3 container-fluid">
         <div class="row">
             <div class="d-flex justify-content-between align-items-center">
@@ -142,13 +300,12 @@ echo "</select>";
                     </div>
                 </form>
 
-
-                <!-- ปุ่มระเบียบการลา -->
+                <!-- Button trigger modal -->
                 <button type="button" class="button-shadow btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#leaveRule">
                     <i class="fa-solid fa-file-shield"></i> ระเบียบการลา
                 </button>
-                <!-- Modal ระเบียบการลา -->
+                <!-- Modal -->
                 <div class="modal fade" id="leaveRule" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
                     aria-labelledby="leaveRuleLabel" aria-hidden="true">
                     <div class="modal-dialog modal-xl">
@@ -265,48 +422,7 @@ echo "</select>";
                             <?php
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal = "SELECT
--- SUM(
---     CASE
---         WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
---             -- กรณีลาในวันเดียว
---             CASE
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) = 8 * 3600 + 40 * 60 THEN 8
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) > 4 * 3600 THEN
---                     ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 1 * 3600) / 3600, 1)
---                 ELSE
---                     ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
---             END
---         WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 1 THEN
---             -- กรณีลา 1 วัน 1 ชั่วโมง
---             CASE
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) >= 8 * 3600 + 60 * 60 THEN
---                     1 + ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 8 * 3600) / 3600, 1) -- 1 วัน + ชั่วโมง
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) >= 7 * 3600 + 40 * 60 THEN
---                     1 -- นับเป็น 1 วัน
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) >= 3 * 3600 + 45 * 60 THEN
---                     0.5 -- นับเป็น 1 วันครึ่ง
---                 ELSE
---                     0 -- ไม่ใช่วันลา
---             END
---         ELSE
---             -- กรณีลาในหลายวัน
---             ((DATEDIFF(l_leave_end_date, l_leave_start_date)) -
---              (SELECT COUNT(*) FROM holiday
---               WHERE h_start_date BETWEEN leave_list.l_leave_start_date AND leave_list.l_leave_end_date
---               AND h_holiday_status = 'วันหยุด'
---               AND h_status = 0)) * 8
---             +
---             -- ตรวจสอบวันสุดท้าย
---             CASE
---                 WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00' THEN
---                     4 -- วันแรกนับเต็มวัน
---                 WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00' THEN
---                     4 -- ลาในช่วง 12:45 ถึง 16:40 นับเป็นครึ่งวัน
---                 ELSE
---                     8 -- ลาเต็มวันในวันสุดท้าย
---             END
---     END
- SUM(
+    SUM(
         CASE
             WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
                 -- กรณีลาในวันเดียว
@@ -337,15 +453,14 @@ $sql_leave_personal = "SELECT
                     ELSE 0
                 END
         END
-) AS leave_personal_count,
-(SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
+    ) AS leave_personal_count,
+    (SELECT e_leave_personal FROM employees WHERE e_usercode = :userCode) AS total_personal
 FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND NOT (TIME(l_leave_start_time) >= '11:45:00' AND TIME(l_leave_end_time) <= '12:45:00')
 AND YEAR(l_create_datetime) = :selectedYear
-AND l_leave_status = 0
-";
+AND l_leave_status = 0";
 
 $stmt_leave_personal = $conn->prepare($sql_leave_personal);
 $stmt_leave_personal->bindParam(':userCode', $userCode);
@@ -399,46 +514,7 @@ if ($result_leave_personal) {
                             <?php
 // ลากิจไม่ได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal_no = "SELECT
--- SUM(
---     CASE
---         WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
---             -- กรณีลาในวันเดียว
---             CASE
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) = 8 * 3600 + 40 * 60 THEN 8
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) > 4 * 3600 THEN
---                     ROUND((TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) - 1 * 3600) / 3600, 1)
---                 ELSE
---                     ROUND(TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) / 3600, 1)
---             END
---         WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 1 THEN
---             -- กรณีลา 1 วันครึ่ง
---             CASE
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) >= 7 * 3600 + 40 * 60 THEN
---                     1 -- นับเป็น 1 วัน
---                 WHEN TIME_TO_SEC(TIMEDIFF(l_leave_end_time, l_leave_start_time)) >= 3 * 3600 + 45 * 60 THEN
---                     0.5 -- นับเป็น 1 วันครึ่ง
---                 ELSE
---                     0 -- ไม่ใช่วันลา
---             END
---         ELSE
---             -- กรณีลาในหลายวัน
---             ((DATEDIFF(l_leave_end_date, l_leave_start_date)) -
---              (SELECT COUNT(*) FROM holiday
---               WHERE h_start_date BETWEEN leave_list.l_leave_start_date AND leave_list.l_leave_end_date
---               AND h_holiday_status = 'วันหยุด'
---               AND h_status = 0)) * 8
---             +
---             -- ตรวจสอบวันสุดท้าย
---             CASE
---                 WHEN TIME(l_leave_start_time) >= '08:00:00' AND TIME(l_leave_end_time) <= '11:45:00' THEN
---                     4 -- วันแรกนับเต็มวัน
---                 WHEN TIME(l_leave_start_time) >= '12:45:00' AND TIME(l_leave_end_time) <= '16:40:00' THEN
---                     4 -- ลาในช่วง 12:45 ถึง 16:40 นับเป็นครึ่งวัน
---                 ELSE
---                     8 -- ลาเต็มวันในวันสุดท้าย
---             END
---         END
- SUM(
+    SUM(
         CASE
             WHEN DATEDIFF(l_leave_end_date, l_leave_start_date) = 0 THEN
                 -- กรณีลาในวันเดียว
@@ -959,7 +1035,7 @@ if ($result_other) {
             <div class="mb-3 d-flex justify-content-end">
                 <!-- ปุ่มยื่นใบลา -->
                 <button type="button" class="button-shadow btn btn-primary mt-3" data-bs-toggle="modal"
-                    data-bs-target="#leaveModal" style="width: 100px;">
+                    data-bs-target="#leaveModal">
                     ยื่นใบลา
                 </button>
                 <!-- ลาฉุกเฉิน -->
@@ -969,13 +1045,12 @@ if ($result_other) {
                 </button>
             </div>
         </div>
-
         <!-- Modal ยื่นใบลา -->
         <div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="leaveModalLabel">รายละเอียดการลา</h5>
+                        <h5 class="modal-title" id="leaveModalLabel">รายละเอียดคำขอ</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -1078,7 +1153,7 @@ if ($result_other) {
                             </div>
                             <div class=" mt-3 row">
                                 <div class="col-12">
-                                    <label for="telPhone" class="form-label">เบอร์โทร</label>
+                                    <label for="telPhone" class="form-label">เบอร์โทรสำหรับการติดต่อ</label>
                                     <?php
 $sql2 = "SELECT e_phone FROM employees WHERE e_usercode = '$userCode'";
 $result2 = $conn->query($sql2);
@@ -1101,8 +1176,7 @@ if ($result2->rowCount() > 0) {
                             </div>
 
                             <div class="mt-3 d-flex justify-content-end">
-                                <button type="submit" class="btn btn-success" name="submit"
-                                    style="width: 100px;">บันทึก</button>
+                                <button type="submit" class="btn btn-success" name="submit">บันทึก</button>
                             </div>
                         </form>
                     </div>
@@ -1251,30 +1325,28 @@ if ($result2->rowCount() > 0) {
         </div>
 
         <!-- ตารางแสดงข้อมูลการลาและมาสาย / อื่น ๆ -->
-        <div class="table-responsive">
-            <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
-                <thead class="table table-secondary">
-                    <tr class="text-center align-middle">
-                        <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">วันที่ยื่น</th>
-                        <th rowspan="2">ประเภทรายการ</th>
-                        <th colspan="2">วันเวลา</th>
-                        <th rowspan="2">จำนวนวันลา</th>
-                        <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะรายการ</th>
-                        <th rowspan="2">สถานะมาสาย</th>
-                        <th rowspan="2">สถานะอนุมัติ_1</th>
-                        <th rowspan="2">สถานะอนุมัติ_2</th>
-                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
-                        <th rowspan="2"></th>
-                    </tr>
-                    <tr class="text-center">
-                        <th>จาก</th>
-                        <th>ถึง</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
+        <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
+            <thead class="table table-secondary">
+                <tr class="text-center align-middle">
+                    <th rowspan="2">ลำดับ</th>
+                    <th rowspan="2">วันที่ยื่น</th>
+                    <th rowspan="2">ประเภทรายการ</th>
+                    <th colspan="2">วันเวลา</th>
+                    <th rowspan="2">จำนวนวันลา</th>
+                    <th rowspan="2">ไฟล์แนบ</th>
+                    <th rowspan="2">สถานะรายการ</th>
+                    <th rowspan="2" hidden>สถานะอนุมัติ_1</th>
+                    <th rowspan="2">สถานะอนุมัติ</th>
+                    <th rowspan="2">สถานะ (เฉพาะ HR)</th>
+                    <th rowspan="2"></th>
+                </tr>
+                <tr class="text-center">
+                    <th>จาก</th>
+                    <th>ถึง</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
 // กำหนดจำนวนรายการต่อหน้า
 $itemsPerPage = 10;
 
@@ -1326,7 +1398,7 @@ if ($result->rowCount() > 0) {
         } elseif ($row['l_leave_id'] == 5) {
             echo '<span class="text-primary">' . 'ลาพักร้อน' . '</span>';
         } elseif ($row['l_leave_id'] == 6) {
-            echo '<span class="text-primary">' . 'ขาดงาน' . '</span>';
+            echo '<span class="text-primary">' . 'หยุดงาน' . '</span>';
         } elseif ($row['l_leave_id'] == 7) {
             echo '<span class="text-primary">' . 'มาสาย' . '</span>';
         } elseif ($row['l_leave_id'] == 8) {
@@ -1370,7 +1442,7 @@ if ($result->rowCount() > 0) {
         } elseif ($row['l_leave_id'] == 5) {
             echo '<span class="text-primary">' . 'ลาพักร้อน' . '</span>' . '<br>' . 'เหตุผล : ' . $row['l_leave_reason'];
         } elseif ($row['l_leave_id'] == 6) {
-            echo '<span class="text-primary">' . 'ขาดงาน' . '</span>' . '<br>';
+            echo '<span class="text-primary">' . 'หยุดงาน' . '</span>' . '<br>';
         } elseif ($row['l_leave_id'] == 7) {
             echo '<span class="text-primary">' . 'มาสาย' . '</span>';
         } elseif ($row['l_leave_id'] == 8) {
@@ -1389,39 +1461,52 @@ if ($result->rowCount() > 0) {
         // 11
         echo '<td>';
 
-        // Query ตรวจสอบวันหยุดในช่วงเวลาการลา
-        $holiday_query = "SELECT COUNT(*) as holiday_count
-        FROM holiday
-        WHERE h_start_date BETWEEN :start_date AND :end_date
-        AND h_holiday_status = 'วันหยุด'
-        AND h_status = 0";
+        $leave_personal_count = 0;
 
-// เตรียม query
-        $holiday_stmt = $conn->prepare($holiday_query);
-        $holiday_stmt->bindParam(':start_date', $row['l_leave_start_date']);
-        $holiday_stmt->bindParam(':end_date', $row['l_leave_end_date']);
-        $holiday_stmt->execute();
-
-// ดึงจำนวนวันหยุด
-        $holiday_data = $holiday_stmt->fetch(PDO::FETCH_ASSOC);
-        $holiday_count = $holiday_data['holiday_count'];
-
-// คำนวณระยะเวลาการลา
+        // คำนวณเวลาจาก SQL
         $l_leave_start_date = new DateTime($row['l_leave_start_date'] . ' ' . $row['l_leave_start_time']);
         $l_leave_end_date = new DateTime($row['l_leave_end_date'] . ' ' . $row['l_leave_end_time']);
-        $interval = $l_leave_start_date->diff($l_leave_end_date);
 
-// หักวันหยุดออกจากวันลา
-        $leave_days = $interval->days - $holiday_count;
+        // คำนวณเวลาที่ลาจริงๆ
+        $interval = $l_leave_start_date->diff($l_leave_end_date);
+        $leave_days = $interval->days;
         $leave_hours = $interval->h;
         $leave_minutes = $interval->i;
 
-// ลดเวลาพักเที่ยงหากเวลาเกิน 4 ชั่วโมง
+        // ลบเวลาพักเที่ยงออกถ้าเวลาเกิน 4 ชั่วโมง
         if ($leave_hours > 4 || ($leave_hours == 4 && $leave_minutes > 0)) {
-            $leave_hours -= 1;
+            $leave_hours -= 1; // ลบ 1 ชั่วโมงสำหรับเวลาพักเที่ยง
         }
 
-// ตรวจสอบกรณีต่างๆ
+        // ตรวจสอบกรณีต่างๆ ตาม SQL
+        if ($leave_days == 0) {
+            // ถ้าวันลาเป็นวันเดียว
+            if ($leave_hours == 8 && $leave_minutes == 40) {
+                $leave_personal_count = 8;
+            } elseif (in_array($leave_hours . ':' . str_pad($leave_minutes, 2, '0', STR_PAD_LEFT) . ':00', [
+                '07:30:00', '07:00:00', '06:30:00', '06:00:00', '05:30:00', '05:00:00',
+                '03:30:00', '03:00:00', '02:30:00', '02:00:00', '01:30:00', '01:00:00',
+                '00:30:00',
+            ])) {
+                $leave_personal_count = round(($leave_hours * 3600 + $leave_minutes * 60) / 3600, 1);
+            } elseif (in_array($leave_hours . ':' . str_pad($leave_minutes, 2, '0', STR_PAD_LEFT) . ':00', [
+                '03:45:00', '03:55:00',
+            ])) {
+                $leave_personal_count = 4;
+            } else {
+                $leave_personal_count = 1;
+            }
+        } else {
+            // กรณีมีหลายวัน
+            $leave_personal_count = $leave_days * 8;
+            if ($l_leave_end_date->format('H:i:s') <= '11:45:00') {
+                $leave_personal_count += 4; // ถ้าสิ้นสุดก่อนหรือเท่ากับ 11:45 น. นับเป็นครึ่งวัน
+            } else {
+                $leave_personal_count += 8; // ถ้าสิ้นสุดหลัง 11:45 น. นับเป็นเต็มวัน
+            }
+        }
+
+        // ตรวจสอบกรณีที่ต้องการ
         if ($leave_days != 0 && $leave_hours == 3 && ($leave_minutes == 45 || $leave_minutes == 55)) {
             $leave_result = $leave_days . ' วันครึ่ง';
         } elseif ($leave_days == 0 && $leave_hours == 7 && $leave_minutes == 40) {
@@ -1434,11 +1519,25 @@ if ($result->rowCount() > 0) {
             $leave_result = $leave_days . ' วัน ' . $leave_hours . ' ชั่วโมง ' . $leave_minutes . ' นาที';
         }
 
-// แสดงผลลัพธ์
-        if ($row['l_leave_id'] == 7) {
-            echo '<span class="text-primary">' . $late_count . ' ครั้ง</span>';
-        } else {
+        // แสดงผลลัพธ์ตามประเภทการลา
+        if ($row['l_leave_id'] == 1) {
             echo '<span class="text-primary">' . $leave_result . '</span>';
+        } elseif ($row['l_leave_id'] == 2) {
+            echo '<span class="text-primary">' . $leave_result . '</span>';
+        } elseif ($row['l_leave_id'] == 3) {
+            echo '<span class="text-primary">' . $leave_result . '</span>';
+        } elseif ($row['l_leave_id'] == 4) {
+            echo '<span class="text-primary">' . $leave_result . '</span>';
+        } elseif ($row['l_leave_id'] == 5) {
+            echo '<span class="text-primary">' . $leave_result . '</span>';
+        } elseif ($row['l_leave_id'] == 6) {
+            echo '<span class="text-primary">' . $leave_result . '</span>';
+        } elseif ($row['l_leave_id'] == 7) {
+            echo '<span class="text-primary">' . $late_count . ' ครั้ง</span>';
+        } elseif ($row['l_leave_id'] == 8) {
+            echo '<span class="text-primary">' . $leave_result . '</span>';
+        } else {
+            echo 'ไม่พบประเภทการลา';
         }
 
         echo '</td>';
@@ -1460,16 +1559,7 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 14
-        echo '<td>';
-        if ($row['l_late_datetime'] == '') {
-            echo '';
-        } else {
-            echo '<span class="text-success">ยืนยัน</span>';
-        }
-        echo '</td>';
-
-        // 15
-        echo '<td>';
+        echo '<td hidden>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
             echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
@@ -1500,7 +1590,7 @@ if ($result->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 16
+        // 15
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
@@ -1532,18 +1622,18 @@ if ($result->rowCount() > 0) {
         }
         echo '</td>';
 
-        // 17
+        // 16
         echo '<td>';
         if ($row['l_hr_status'] == 0) {
             echo '<span class="text-warning"><b>รอตรวจสอบ</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
-            echo '<span class="text-success"><b>ผ่าน</b></span>';
+            echo '<span class="text-success"><b>ตรวจสอบผ่าน</b></span>';
         } else {
-            echo '<span class="text-danger"><b>ไม่ผ่าน</b></span>';
+            echo '<span class="text-danger"><b>ตรวจสอบไม่ผ่าน</b></span>';
         }
         echo '</td>';
 
-        // 18
+        // 17
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
         if ($row['l_leave_id'] != 7) {
             echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
@@ -1558,15 +1648,14 @@ if ($result->rowCount() > 0) {
         // echo '<td><img src="../upload/' . $row['Img_file'] . '" id="img" width="100" height="100"></td>';
     }
 } else {
-    echo "<tr><td colspan='12' style='color: red;'>ไม่พบข้อมูล</td></tr>";
+    echo "<tr><td colspan='10' style='color: red;'>ไม่พบข้อมูล</td></tr>";
 }
 // ปิดการเชื่อมต่อ
 // $conn = null;
 ?>
 
-                </tbody>
-            </table>
-        </div>
+            </tbody>
+        </table>
         <?php
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
@@ -1618,9 +1707,8 @@ echo '</div>';
 
     <script>
     $(document).ready(function() {
-
         $.ajax({
-            url: 'a_u_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
+            url: 'g_ajax_get_holiday.php', // สร้างไฟล์ PHP เพื่อตรวจสอบวันหยุด
             type: 'GET',
             dataType: 'json',
             success: function(response) {
@@ -1657,7 +1745,6 @@ echo '</div>';
             }
         });
 
-        // ยื่นใบลา
         $('#leaveForm').submit(function(e) {
             e.preventDefault(); // ป้องกันฟอร์มจากการส่งอย่างปกติ
 
@@ -1671,11 +1758,6 @@ echo '</div>';
             fd.append('depart', '<?php echo $depart; ?>');
             fd.append('level', '<?php echo $level; ?>');
             fd.append('workplace', '<?php echo $workplace; ?>');
-            fd.append('subDepart', '<?php echo $subDepart; ?>');
-            fd.append('subDepart2', '<?php echo $subDepart2; ?>');
-            fd.append('subDepart3', '<?php echo $subDepart3; ?>');
-            fd.append('subDepart4', '<?php echo $subDepart4; ?>');
-            fd.append('subDepart5', '<?php echo $subDepart5; ?>');
 
             // ดึงค่าจากฟอร์ม
             var leaveType = $('#leaveType').val();
@@ -1685,21 +1767,6 @@ echo '</div>';
             var endDate = $('#endDate').val();
             var endTime = $('#endTime').val();
             var files = $('#file')[0].files;
-
-            var createDate = new Date();
-
-            var year = createDate.getFullYear();
-            var month = ("0" + (createDate.getMonth() + 1)).slice(-2); // Months are zero-based
-            var day = ("0" + createDate.getDate()).slice(-2);
-
-            var hours = ("0" + createDate.getHours()).slice(-2);
-            var minutes = ("0" + createDate.getMinutes()).slice(-2);
-            var seconds = ("0" + createDate.getSeconds()).slice(-2);
-
-            var formattedDate = year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" +
-                seconds;
-
-            console.log(formattedDate);
 
             // เช็คว่าหากเหตุผลในการลาเป็น "อื่น ๆ" ให้ใช้ค่าจาก input ที่มี id="otherReason"
             if (leaveReason === 'อื่น ๆ') {
@@ -1714,86 +1781,51 @@ echo '</div>';
             fd.append('endDate', endDate);
             fd.append('endTime', endTime);
             fd.append('file', files[0]);
-            fd.append('formattedDate', formattedDate);
 
-            // if (leaveType == '0') {
-            //     Swal.fire({
-            //         title: "ไม่สามารถลาได้",
-            //         text: "กรุณาเลือกประเภทการลา",
-            //         icon: "error"
-            //     });
-            //     return false;
-            // }
+            if (leaveType == '1') {
+                var leave_personal_days = <?php echo $leave_personal_days; ?>;
+                var total_personal = <?php echo $total_personal; ?>;
 
-            // // ลากิจได้รับค่าจ้าง
-            // else if (leaveType == '1') {
-            //     var leave_personal_days = <?php echo $leave_personal_days; ?>;
-            //     var total_personal = <?php echo $total_personal; ?>;
+                if (leave_personal_days >= total_personal) {
+                    Swal.fire({
+                        title: "ไม่สามารถลาได้",
+                        text: "เนื่องจากเกินสิทธิ์",
+                        icon: "error"
+                    });
+                    return false;
+                    location.reload()
+                }
+            } else if (leaveType == '2') {
+                var leave_personal_no_days = <?php echo $leave_personal_no_days; ?>;
+                var total_personal_no = <?php echo $total_personal_no; ?>;
 
-            //     if (startDate == endDate) {
-            //         Swal.fire({
-            //             title: "ไม่สามารถลาได้",
-            //             text: "ลากิจต้องลาล่วงหน้า 1 วัน",
-            //             icon: "error"
-            //         });
-            //         return false;
-            //     } else if (leave_personal_days >= total_personal) {
-            //         Swal.fire({
-            //             title: "ไม่สามารถลาได้",
-            //             text: "เนื่องจากเกินสิทธิ์",
-            //             icon: "error"
-            //         });
-            //         return false;
-            //     } else {
-            //         // ถ้าเงื่อนไขทั้งหมดผ่าน สามารถดำเนินการลาหยุดได้ที่นี่
-            //         // เขียนโค้ดการลาหยุดเพิ่มเติมได้ตามที่ต้องการ
-            //     }
-            // }
-            // // ลากิจไม่ได้รับค่าจ้าง
-            // else if (leaveType == '2') {
-            //     var leave_personal_no_days = <?php echo $leave_personal_no_days; ?>;
-            //     var total_personal_no = <?php echo $total_personal_no; ?>;
+                if (leave_personal_no_days >= total_personal_no) {
+                    Swal.fire({
+                        title: "ไม่สามารถลาได้",
+                        text: "เนื่องจากเกินสิทธิ์",
+                        icon: "error"
+                    });
+                    return false;
+                    location.reload()
 
-            //     if (leave_personal_no_days >= total_personal_no) {
-            //         Swal.fire({
-            //             title: "ไม่สามารถลาได้",
-            //             text: "เนื่องจากเกินสิทธิ์",
-            //             icon: "error"
-            //         });
-            //         return false;
-            //         location.reload()
+                }
+            } else if (leaveType == '3') {
+                var leave_sick_days = <?php echo $leave_sick_days; ?>;
+                var total_sick = <?php echo $total_sick; ?>;
 
-            //     }
-            // } else if (leaveType == '3') {
-            //     var leave_sick_days = <?php echo $leave_sick_days; ?>;
-            //     var total_sick = <?php echo $total_sick; ?>;
-
-            //     if (leave_sick_days >= total_sick) {
-            //         Swal.fire({
-            //             title: "ไม่สามารถลาได้",
-            //             text: "เนื่องจากเกินสิทธิ์",
-            //             icon: "error"
-            //         });
-            //         return false;
-            //         location.reload()
-            //     }
-            // } else if (leaveType == '4') {
-            //     var leave_sick_work_days = <?php echo $leave_sick_work_days; ?>;
-            //     var total_sick_work = <?php echo $total_sick_work; ?>;
-
-            //     if (leave_sick_work_days >= total_sick_work) {
-            //         Swal.fire({
-            //             title: "ไม่สามารถลาได้",
-            //             text: "เนื่องจากเกินสิทธิ์",
-            //             icon: "error"
-            //         });
-            //         return false;
-            //         location.reload()
-            //     }
-            // }
+                if (leave_sick_days >= total_sick) {
+                    Swal.fire({
+                        title: "ไม่สามารถลาได้",
+                        text: "เนื่องจากเกินสิทธิ์",
+                        icon: "error"
+                    });
+                    return false;
+                    location.reload()
+                }
+            }
 
             $.ajax({
-                url: 'a_u_ajax_add_leave.php',
+                url: 'g_ajax_add_leave.php',
                 type: 'POST',
                 data: fd,
                 contentType: false,
@@ -1822,11 +1854,6 @@ echo '</div>';
             fd.append('depart', '<?php echo $depart; ?>');
             fd.append('level', '<?php echo $level; ?>');
             fd.append('workplace', '<?php echo $workplace; ?>');
-            fd.append('subDepart', '<?php echo $subDepart; ?>');
-            fd.append('subDepart2', '<?php echo $subDepart2; ?>');
-            fd.append('subDepart3', '<?php echo $subDepart3; ?>');
-            fd.append('subDepart4', '<?php echo $subDepart4; ?>');
-            fd.append('subDepart5', '<?php echo $subDepart5; ?>');
 
             // ดึงค่าจากฟอร์ม
             var urgentLeaveType = $('#urgentLeaveType').val();
@@ -1865,7 +1892,7 @@ echo '</div>';
             }
 
             $.ajax({
-                url: 'a_u_ajax_add_urgent_leave.php',
+                url: 'g_ajax_add_urgent_leave.php',
                 type: 'POST',
                 data: fd,
                 contentType: false,
@@ -1895,6 +1922,8 @@ echo '</div>';
             var leaveId = $(this).data('leaveid');
             var createDatetime = $(this).closest('tr').find('td:eq(7)').text();
             var usercode = $(this).data('usercode');
+            var userName = "<?php echo $userName ?>";
+            var level = "<?php echo $level ?>";
             var name = "<?php echo $name ?>";
             var leaveType = $(rowData[0]).text();
             var depart = $(rowData[1]).text();
@@ -1909,8 +1938,7 @@ echo '</div>';
             var subDepart4 = "<?php echo $subDepart4 ?>";
             var subDepart5 = "<?php echo $subDepart5 ?>";
 
-
-            // alert(endDate)
+            // alert(startDate)
             Swal.fire({
                 title: "ต้องการยกเลิกรายการ ?",
                 icon: "question",
@@ -1918,31 +1946,31 @@ echo '</div>';
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'ใช่',
-                cancelButtonText: 'ไม่'
+                cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ยืนยันก่อนส่ง AJAX request
                     $.ajax({
-                        url: 'a_u_ajax_delete_leave.php',
+                        url: 'g_ajax_delete_leave.php',
                         method: 'POST',
                         data: {
                             leaveId: leaveId,
                             createDatetime: createDatetime,
                             usercode: usercode,
+                            userName: userName,
                             name: name,
                             leaveType: leaveType,
+                            depart: depart,
                             leaveReason: leaveReason,
                             startDate: startDate,
                             endDate: endDate,
-                            depart: depart,
                             leaveStatus: leaveStatus,
                             workplace: workplace,
                             subDepart: subDepart,
                             subDepart2: subDepart2,
                             subDepart3: subDepart3,
                             subDepart4: subDepart4,
-                            subDepart5: subDepart5
-
+                            subDepart5: subDepart5,
+                            level: level
                         },
                         success: function(response) {
                             Swal.fire({
@@ -1962,11 +1990,10 @@ echo '</div>';
         });
         $('.confirm-late-btn').click(function() {
             var rowData = $(this).closest('tr').children('td');
-            var createDatetime = $(this).data('createdatetime');
+            var createDatetime = $(this).data('createdatetime'); // ใช้ data attribute ที่เก็บมา
             var userCode = $(this).data('usercode');
             var userName = "<?php echo $userName ?>";
             var comfirmName = "<?php echo $name ?>";
-            var workplace = "<?php echo $workplace ?>";
             // var leaveType = $(rowData[0]).text();
             var depart = $(rowData[1]).text();
             var lateDate = $(rowData[3]).text();
@@ -1974,23 +2001,23 @@ echo '</div>';
             var lateEnd = $(rowData[5]).text();
             var leaveStatus = $(rowData[13]).text();
 
-            // alert(comfirmName)
+            // alert(userCode)
             Swal.fire({
                 title: "ยืนยันรายการมาสาย ?",
                 icon: "question",
                 showCancelButton: true,
-                confirmButtonColor: '#198754',
-                cancelButtonColor: '#DC3545',
-                confirmButtonText: 'ยืนยัน',
-                cancelButtonText: 'ยกเลิก'
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ใช่',
+                cancelButtonText: 'ไม่'
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: 'a_u_upd_late_time.php',
+                        url: 'g_upd_late_time.php',
                         method: 'POST',
                         data: {
                             userName: userName,
-                            createDateTime: createDatetime,
+                            createDateTime: createDatetime, // ใช้ createDatetime ที่ได้จาก data attribute
                             depart: depart,
                             lateDate: lateDate,
                             lateStart: lateStart,
@@ -1998,7 +2025,6 @@ echo '</div>';
                             userCode: userCode,
                             comfirmName: comfirmName,
                             leaveStatus: leaveStatus,
-                            workplace: workplace,
                             action: 'comfirm'
                         },
                         success: function(response) {
@@ -2007,7 +2033,7 @@ echo '</div>';
                                 icon: 'success'
                             }).then(() => {
                                 location
-                                    .reload();
+                                    .reload(); // โหลดหน้าใหม่หลังจากยกเลิกใบลา
                             });
                         },
                         error: function() {
@@ -2022,10 +2048,8 @@ echo '</div>';
         });
     });
 
-
     function checkOther(select) {
         var otherReasonInput = document.getElementById('otherReason');
-
         if (select.value === 'อื่น ๆ') {
             otherReasonInput.classList.remove('d-none');
         } else {
@@ -2035,26 +2059,50 @@ echo '</div>';
 
     function updateLeaveReasonField() {
         var leaveType = document.getElementById('leaveType').value;
-
         var leaveReasonField = document.getElementById('leaveReason');
         var otherReasonField = document.getElementById('otherReason');
 
-        // อัปเดตเหตุผลการลา
         if (leaveType === '1') { // ลากิจได้รับค่าจ้าง
             leaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
                 '<option value="อื่น ๆ">อื่น ๆ</option>';
-        } else if (leaveType === '2') { // ลากิจไม่ได้รับค่าจ้าง
+            if (select.value === 'อื่น ๆ') {
+                otherReasonField.classList.remove('d-none');
+            } else {
+                otherReasonField.classList.add('d-none');
+            }
+        } else if (leaveType === '2') { // ลากิจได้รับค่าจ้าง
             leaveReasonField.innerHTML = '<option value="กิจส่วนตัว">กิจส่วนตัว</option>' +
                 '<option value="อื่น ๆ">อื่น ๆ</option>';
+            if (select.value === 'อื่น ๆ') {
+                otherReasonField.classList.remove('d-none');
+            } else {
+                otherReasonField.classList.add('d-none');
+            }
+
         } else if (leaveType === '3') { // ลาป่วย
             leaveReasonField.innerHTML = '<option value="ป่วย">ป่วย</option>' +
                 '<option value="อื่น ๆ">อื่น ๆ</option>';
+            if (select.value === 'อื่น ๆ') {
+                otherReasonField.classList.remove('d-none');
+            } else {
+                otherReasonField.classList.add('d-none');
+            }
         } else if (leaveType === '4') { // ลาป่วยจากงาน
             leaveReasonField.innerHTML = '<option value="ป่วย">ป่วย</option>' +
                 '<option value="อื่น ๆ">อื่น ๆ</option>';
+            if (select.value === 'อื่น ๆ') {
+                otherReasonField.classList.remove('d-none');
+            } else {
+                otherReasonField.classList.add('d-none');
+            }
         } else if (leaveType === '5') { // ลาพักร้อน
             leaveReasonField.innerHTML = '<option value="พักร้อน">พักร้อน</option>' +
                 '<option value="อื่น ๆ">อื่น ๆ</option>';
+            if (select.value === 'อื่น ๆ') {
+                otherReasonField.classList.remove('d-none');
+            } else {
+                otherReasonField.classList.add('d-none');
+            }
         } else if (leaveType === '8') { // อื่น ๆ
             leaveReasonField.innerHTML = '<option value="ลาเพื่อทำหมัน">ลาเพื่อทำหมัน</option>' +
                 '<option value="ลาคลอด">ลาคลอด</option>' +
@@ -2064,18 +2112,13 @@ echo '</div>';
                 '<option value="ลาเพื่อพัฒนาและเรียนรู้">ลาเพื่อพัฒนาและเรียนรู้</option>' +
                 '<option value="ลาเพื่อการสมรส">ลาเพื่อการสมรส</option>' +
                 '<option value="อื่น ๆ">อื่น ๆ</option>';
-        } else {
-            leaveReasonField.innerHTML = '<option selected disabled>เลือกเหตุผลการลา</option>';
-        }
-
-        // การจัดการการแสดง/ซ่อนฟิลด์เหตุผล "อื่น ๆ"
-        if (leaveType === '5' || leaveType === '8') { // หากเป็นลาพักร้อนหรือประเภทอื่น ๆ
-            if (leaveReasonField.value === 'อื่น ๆ') {
+            if (select.value === 'อื่น ๆ') {
                 otherReasonField.classList.remove('d-none');
             } else {
                 otherReasonField.classList.add('d-none');
             }
         } else {
+            leaveReasonField.innerHTML = '<option selected disabled>เลือกเหตุผลการลา</option>';
             otherReasonField.classList.add('d-none');
         }
     }

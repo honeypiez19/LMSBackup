@@ -13,34 +13,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $level = $_POST['level'];
     $workplace = $_POST['workplace'];
 
-    $subDepart = $_POST['subDepart'];
-    $subDepart2 = $_POST['subDepart2'];
-    $subDepart3 = $_POST['subDepart3'];
-    $subDepart4 = $_POST['subDepart4'];
-    $subDepart5 = $_POST['subDepart5'];
-    $urgentLeaveType = $_POST['urgentLeaveType'];
-    $urgentLeaveReason = $_POST['urgentLeaveReason'];
+    $leaveType = $_POST['leaveType'];
+    $leaveReason = $_POST['leaveReason'];
 
-    // ตรวจสอบประเภทการลาเร่งด่วน
+    // ตรวจสอบประเภทการลา
     $leaveTypes = [
         1 => 'ลากิจได้รับค่าจ้าง',
         2 => 'ลากิจไม่ได้รับค่าจ้าง',
-        5 => 'ลาพักร้อนฉุกเฉิน',
+        3 => 'ลาป่วย',
+        4 => 'ลาป่วยจากงาน',
+        5 => 'ลาพักร้อน',
+        8 => 'อื่น ๆ',
     ];
-    $leaveName = $leaveTypes[$urgentLeaveType] ?? 'ไม่พบประเภทการลา';
+    $leaveName = $leaveTypes[$leaveType] ?? 'ไม่พบประเภทการลา';
 
-    // วันที่ + เวลาเริ่มต้นที่ลาเร่งด่วน
-    $urgentStartDate = date('Y-m-d', strtotime($_POST['urgentStartDate']));
-    $urgentStartTime = $_POST['urgentStartTime'];
+    // วันที่ + เวลาเริ่มต้นที่ลา
+    $leaveDateStart = date('Y-m-d', strtotime($_POST['startDate']));
+    $leaveTimeStart = $_POST['startTime'];
 
-    // วันที่ + เวลาสิ้นสุดที่ลาเร่งด่วน
-    $urgentEndDate = date('Y-m-d', strtotime($_POST['urgentEndDate']));
-    $urgentEndTime = $_POST['urgentEndTime'];
+    // วันที่ + เวลาสิ้นสุดที่ลา
+    $leaveDateEnd = date('Y-m-d', strtotime($_POST['endDate']));
+    $leaveTimeEnd = $_POST['endTime'];
 
-    // วันที่สร้างใบลาเร่งด่วน
-    $createDatetime = date('Y-m-d H:i:s');
-    $remark = 'ลาฉุกเฉิน';
+    // วันที่สร้างใบลา
+    $formattedDate = $_POST['formattedDate'];
 
+    
+    if (DateTime::createFromFormat('d-m-Y', $_POST['startDate']) !== false) {
+        $leaveDateStart = date('Y-m-d', strtotime($_POST['startDate']));
+    } else {
+        echo "รูปแบบวันที่ไม่ถูกต้อง";
+    }
+    
     // สถานะใบลา
     $leaveStatus = 0;
     $leaveStatusName = ($leaveStatus == 0) ? 'ปกติ' : 'ยกเลิก';
@@ -49,50 +53,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $proveStatus = 0;
     $proveStatus2 = 1;
 
+    $subDepart = $_POST['subDepart'];
+    $subDepart2 = $_POST['subDepart2'];
+    $subDepart3 = $_POST['subDepart3'];
+    $subDepart4 = $_POST['subDepart4'];
+    $subDepart5 = $_POST['subDepart5'];
+
     $filename = null;
-    if (isset($_FILES['urgentFile']) && $_FILES['urgentFile']['error'] === UPLOAD_ERR_OK) {
-        $filename = $_FILES['urgentFile']['name'];
+    if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+        $filename = $_FILES['file']['name'];
         $location = "../upload/" . $filename;
         $imageFileType = strtolower(pathinfo($location, PATHINFO_EXTENSION));
 
         $valid_extensions = ["jpg", "jpeg", "png"];
         if (in_array($imageFileType, $valid_extensions)) {
-            if (move_uploaded_file($_FILES['urgentFile']['tmp_name'], $location)) {
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $location)) {
                 $response = $location;
             }
         }
     }
 
-    $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason, l_leave_start_date,
-    l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_remark, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace)
-    VALUES (:userCode, :userName, :name, :depart, :telPhone, :urgentLeaveType, :urgentLeaveReason, :urgentStartDate,
-    :urgentStartTime, :urgentEndDate, :urgentEndTime, :createDatetime, :filename, :remark, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace)");
+    $stmt = $conn->prepare("INSERT INTO leave_list (l_usercode, l_username, l_name, l_department, l_phone, l_leave_id, l_leave_reason,
+    l_leave_start_date, l_leave_start_time, l_leave_end_date, l_leave_end_time, l_create_datetime, l_file, l_leave_status, l_hr_status, l_approve_status, l_level, l_approve_status2, l_workplace)
+    VALUES (:userCode, :userName, :name, :depart, :telPhone, :leaveType, :leaveReason, :leaveDateStart, :leaveTimeStart,
+    :leaveDateEnd, :leaveTimeEnd, :formattedDate, :filename, :leaveStatus, :comfirmStatus, :proveStatus, :level, :proveStatus2, :workplace)");
 
-    // Bind Parameters
     $stmt->bindParam(':userCode', $userCode);
     $stmt->bindParam(':userName', $userName);
     $stmt->bindParam(':name', $name);
     $stmt->bindParam(':depart', $depart);
     $stmt->bindParam(':telPhone', $telPhone);
-    $stmt->bindParam(':urgentLeaveType', $urgentLeaveType);
-    $stmt->bindParam(':urgentLeaveReason', $urgentLeaveReason);
-    $stmt->bindParam(':urgentStartDate', $urgentStartDate);
-    $stmt->bindParam(':urgentStartTime', $urgentStartTime);
-    $stmt->bindParam(':urgentEndDate', $urgentEndDate);
-    $stmt->bindParam(':urgentEndTime', $urgentEndTime);
-    $stmt->bindParam(':createDatetime', $createDatetime);
+    $stmt->bindParam(':leaveType', $leaveType);
+    $stmt->bindParam(':leaveReason', $leaveReason);
+    $stmt->bindParam(':leaveDateStart', $leaveDateStart);
+    $stmt->bindParam(':leaveTimeStart', $leaveTimeStart);
+    $stmt->bindParam(':leaveDateEnd', $leaveDateEnd);
+    $stmt->bindParam(':leaveTimeEnd', $leaveTimeEnd);
+    $stmt->bindParam(':formattedDate', $formattedDate);
     $stmt->bindParam(':filename', $filename);
-    $stmt->bindParam(':remark', $remark);
     $stmt->bindParam(':leaveStatus', $leaveStatus);
     $stmt->bindParam(':comfirmStatus', $comfirmStatus);
     $stmt->bindParam(':proveStatus', $proveStatus);
-    $stmt->bindParam(':level', $level);
     $stmt->bindParam(':proveStatus2', $proveStatus2);
+    $stmt->bindParam(':level', $level);
     $stmt->bindParam(':workplace', $workplace);
 
     if ($stmt->execute()) {
         $sURL = 'https://lms.system-samt.com/';
-        $sMessage = "มีใบลาด่วนของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\nวันเวลาที่ลา : $urgentStartDate $urgentStartTime ถึง $urgentEndDate $urgentEndTime\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        $sMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStart ถึง $leaveDateEnd $leaveTimeEnd\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        // $sMessage = $depart;
 
         if ($depart == 'RD') {
             // แจ้งไลน์โฮซัง
@@ -142,9 +151,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo "ไม่พบเงื่อนไข";
         }
 
-        // แจ้งเตือนไลน์หัวหน้ากับ ผจก ในแผนก
-        // $stmt = $conn->prepare("SELECT e_token FROM employees WHERE e_department = :depart AND e_level IN ('chief', 'manager')");
-        // $stmt->bindParam(':depart', $depart);
         $stmt->execute();
         $tokens = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -183,7 +189,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // $stmt->execute();
         // $admins = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        // $aMessage = "มีใบลาด่วนของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $urgentLeaveReason\nวันเวลาที่ลา : $urgentStartDate $urgentStartTime ถึง $urgentEndDate $urgentEndTime\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
+        // $aMessage = "มีใบลาของ $name \nประเภทการลา : $leaveName\nเหตุผลการลา : $leaveReason\nวันเวลาที่ลา : $leaveDateStart $leaveTimeStart ถึง $leaveDateEnd $leaveTimeEnd\nสถานะใบลา : $leaveStatusName\nกรุณาเข้าสู่ระบบเพื่อดูรายละเอียด : $sURL";
         // if ($admins) {
         //     foreach ($admins as $sToken) {
         //         $chOne = curl_init();
