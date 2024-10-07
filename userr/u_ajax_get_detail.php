@@ -2,7 +2,6 @@
 include '../connect.php';
 if (isset($_POST['leaveType'])) {
     $leaveType = $_POST['leaveType'];
-    $userCode = $_POST['userCode'];
 
     if ($leaveType == 'ลากิจได้รับค่าจ้าง') {
         $conType = str_replace("ลากิจได้รับค่าจ้าง", "1", $leaveType);
@@ -25,7 +24,7 @@ if (isset($_POST['leaveType'])) {
     }
 
     // ดึงข้อมูลการลาจากฐานข้อมูล
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id = '$conType' AND l_usercode = '$userCode' ORDER BY l_create_datetime";
+    $sql = "SELECT * FROM leave_list WHERE l_leave_id = '$conType' ORDER BY l_create_datetime";
     $result = $conn->query($sql);
     $totalRows = $result->rowCount();
     $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
