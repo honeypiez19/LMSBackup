@@ -36,7 +36,7 @@ $userCode = $_SESSION['s_usercode'];
 </head>
 
 <body>
-    <?php include 'gm_navbar.php'?>
+    <?php include 'manager_navbar.php'?>
 
     <!-- <?php echo $subDepart; ?>
     <?php echo $subDepart2; ?>
@@ -128,20 +128,44 @@ echo "</select>";
                             <?php
 // เตรียมคำสั่ง SQL
 $sql = "SELECT
-    COUNT(li.l_list_id) AS leave_count,
-    li.l_name
-FROM
-    leave_list li
+    COUNT(li.l_list_id) AS totalLeaveItems,
+    li.l_username,
+    li.l_name,
+    li.l_department,
+    em.e_sub_department,
+    em.e_sub_department2,
+    em.e_sub_department3,
+    em.e_sub_department4,
+    em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+    ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_department <> 'RD'
-    AND li.l_leave_status = 0
-    AND li.l_leave_id NOT IN (6, 7)
+     li.l_approve_status IN (0,2,3,6)
+    -- AND li.l_approve_status2 = 1
+    AND li.l_level IN ('user', 'chief', 'leader')
+    AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
     AND Year(li.l_create_datetime) = :selectedYear
-    AND Month(li.l_create_datetime) = :selectedMonth";
+    AND Month(li.l_create_datetime) = :selectedMonth
+    AND (
+        -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+        (em.e_department = :subDepart AND li.l_department = :subDepart)
+        OR
+        -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+        (li.l_level = 'chief' AND em.e_department = 'Management')
+        OR
+        -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+        (em.e_department = 'Management' AND li.l_department IN (
+            em.e_sub_department,
+            em.e_sub_department2,
+            em.e_sub_department3,
+            em.e_sub_department4,
+            em.e_sub_department5))
+    )";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':selectedMonth', $selectedMonth);
 $stmt->bindParam(':selectedYear', $selectedYear);
 
@@ -171,21 +195,44 @@ $totalLeaveItems = $stmt->fetchColumn();
                         <h5 class="card-title">
                             <?php
 $sql = "SELECT
-    COUNT(li.l_list_id) AS leave_count,
-    li.l_name
-FROM
-    leave_list li
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
 WHERE
-    li.l_department <> 'RD'
-    AND li.l_leave_status = 0
-    AND li.l_approve_status2 = 1
-    AND li.l_leave_id NOT IN (6, 7)
-    AND Year(li.l_create_datetime) = :selectedYear
-    AND Month(li.l_create_datetime) = :selectedMonth";
+ li.l_approve_status IN (0,2,3,6)
+AND li.l_approve_status2 = 1
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
+AND Year(li.l_create_datetime) = :selectedYear
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':selectedMonth', $selectedMonth);
 $stmt->bindParam(':selectedYear', $selectedYear);
 
@@ -213,21 +260,44 @@ $totalLeaveItems = $stmt->fetchColumn();
                         <h5 class="card-title">
                             <?php
 $sql = "SELECT
-COUNT(li.l_list_id) AS leave_count,
-li.l_name
-FROM
-leave_list li
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
 WHERE
-li.l_department <> 'RD'
-AND li.l_leave_status = 0
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 4
-AND li.l_leave_id NOT IN (6, 7)
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
 AND Year(li.l_create_datetime) = :selectedYear
-AND Month(li.l_create_datetime) = :selectedMonth";
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':selectedMonth', $selectedMonth);
 $stmt->bindParam(':selectedYear', $selectedYear);
 $stmt->execute();
@@ -254,21 +324,44 @@ $totalLeaveItems = $stmt->fetchColumn();
                         <h5 class="card-title">
                             <?php
 $sql = "SELECT
-COUNT(li.l_list_id) AS leave_count,
-li.l_name
-FROM
-leave_list li
+COUNT(li.l_list_id) AS totalLeaveItems,
+li.l_username,
+li.l_name,
+li.l_department,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
 WHERE
-li.l_department <> 'RD'
-AND li.l_leave_status = 0
+ li.l_approve_status IN (0,2,3,6)
 AND li.l_approve_status2 = 5
-AND li.l_leave_id NOT IN (6, 7)
+AND li.l_level IN ('user', 'chief', 'leader')
+AND (li.l_leave_id <> 6 AND li.l_leave_id <> 7)
 AND Year(li.l_create_datetime) = :selectedYear
-AND Month(li.l_create_datetime) = :selectedMonth";
+AND Month(li.l_create_datetime) = :selectedMonth
+AND (
+    -- ตรวจสอบว่าแผนกปกติหรือเป็น Management
+    (em.e_department = :subDepart AND li.l_department = :subDepart)
+    OR
+    -- เงื่อนไขสำหรับระดับหัวหน้าใน Management
+    (li.l_level = 'chief' AND em.e_department = 'Management')
+    OR
+    -- หรือแสดงเฉพาะกรณีเป็น Management และตรงกับแผนกย่อย
+    (em.e_department = 'Management' AND li.l_department IN (
+        em.e_sub_department,
+        em.e_sub_department2,
+        em.e_sub_department3,
+        em.e_sub_department4,
+        em.e_sub_department5))
+)";
 
 // เตรียมและรัน query
 $stmt = $conn->prepare($sql);
-// $stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':selectedMonth', $selectedMonth);
 $stmt->bindParam(':selectedYear', $selectedYear);
 $stmt->execute();
@@ -339,15 +432,22 @@ if (!isset($_GET['page'])) {
 // AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC";
 
 $sql = "SELECT
-li.*
-FROM
-leave_list li
+li.*,
+em.e_sub_department,
+em.e_sub_department2,
+em.e_sub_department3,
+em.e_sub_department4,
+em.e_sub_department5
+FROM leave_list li
+INNER JOIN employees em
+ON li.l_usercode = em.e_usercode
 WHERE
-li.l_department <> 'RD'
-AND li.l_leave_status = 0
+ li.l_approve_status IN (0, 2, 3, 6)
+AND li.l_level IN ('user', 'chief', 'leader')
 AND li.l_leave_id NOT IN (6, 7)
 AND Year(li.l_create_datetime) = '$selectedYear'
 AND Month(li.l_create_datetime) = '$selectedMonth'
+
 ORDER BY l_create_datetime DESC";
 
 $result = $conn->query($sql);
@@ -505,8 +605,6 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
-        } elseif ($row['l_approve_status'] == 6) {
-            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -548,8 +646,6 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
-        } elseif ($row['l_approve_status2'] == 6) {
-            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -724,7 +820,7 @@ echo '</div>';
 
             // alert(leaveStatus)
             $.ajax({
-                url: 'g_ajax_upd_status.php',
+                url: 'm_ajax_upd_status.php',
                 method: 'POST',
                 data: {
                     createDate: createDate,
@@ -796,6 +892,7 @@ echo '</div>';
                 }
             });
 
+
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -813,7 +910,7 @@ echo '</div>';
             var reason = reasonNoProve;
 
             $.ajax({
-                url: 'g_ajax_upd_status.php',
+                url: 'm_ajax_upd_status.php',
                 method: 'POST',
                 data: {
                     createDate: createDate,
@@ -855,15 +952,19 @@ echo '</div>';
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var selectedYear = $("#selectedYear").val();
+        var depart = <?php echo json_encode($depart); ?>;
+        var subDepart = <?php echo json_encode($subDepart); ?>;
 
         // alert(selectedYear)
         $.ajax({
-            url: 'g_ajax_get_leave_data.php',
+            url: 'm_ajax_get_leave_data.php',
             method: 'GET',
             data: {
                 status: status,
                 month: selectedMonth,
-                year: selectedYear
+                year: selectedYear,
+                depart: depart,
+                subDepart: subDepart
             },
             dataType: 'json',
             success: function(data) {
@@ -1242,7 +1343,7 @@ echo '</div>';
                                 var proveName = '<?php echo $name; ?>';
 
                                 $.ajax({
-                                    url: 'g_ajax_upd_status.php',
+                                    url: 'm_ajax_upd_status.php',
                                     method: 'POST',
                                     data: {
                                         createDate: createDate,
@@ -1340,7 +1441,7 @@ echo '</div>';
                             var reason = reasonNoProve;
 
                             $.ajax({
-                                url: 'g_ajax_upd_status.php',
+                                url: 'm_ajax_upd_status.php',
                                 method: 'POST',
                                 data: {
                                     createDate: createDate,
@@ -1382,7 +1483,7 @@ echo '</div>';
                             'usercode'); // ดึงรหัสพนักงานจาก data attribute
 
                         $.ajax({
-                            url: 'g_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+                            url: 'm_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
                             type: 'POST',
                             data: {
                                 userCode: userCode
@@ -1410,7 +1511,7 @@ echo '</div>';
         var userCode = $(this).data('usercode'); // ดึงรหัสพนักงานจาก data attribute
 
         $.ajax({
-            url: 'g_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
+            url: 'm_ajax_get_leave_history.php', // URL ของไฟล์ PHP ที่จะจัดการข้อมูล
             type: 'POST',
             data: {
                 userCode: userCode

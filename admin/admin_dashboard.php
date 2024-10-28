@@ -108,7 +108,9 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -128,7 +130,9 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 
 ?>
@@ -149,7 +153,9 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -169,7 +175,9 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 AND l_leave_id <> 7";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -191,7 +199,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
             <thead>
                 <tr class="text-center align-middle">
                     <th rowspan="2">ลำดับ</th>
-                    <th rowspan="2">รหัสพนักงาน</th>
+                    <th rowspan="1">รหัสพนักงาน</th>
                     <th rowspan="1">ชื่อ - นามสกุล</th>
                     <th rowspan="2">วันที่ยื่นใบลา</th>
                     <th rowspan="1">รายการลา</th>
@@ -212,6 +220,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                 <tr class="text-center">
                     <th><input type="text" class="form-control" id="codeSearch"></th>
                     <th><input type="text" class="form-control" id="nameSearch"></th>
+                    <th><input type="text" class="form-control" id="leaveSearch"></th>
                     <!-- <th><input type="text" class="form-control" id="leaveSearch"></th> -->
                     <th>จาก</th>
                     <th>ถึง</th>
@@ -228,7 +237,12 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' AND l_leave_id <> 6 AND l_leave_id <> 7 ORDER BY l_create_datetime DESC ";
+$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
+AND Year(l_create_datetime) = '$selectedYear' 
+AND l_leave_id <> 6 
+AND l_leave_id <> 7 ORDER BY l_create_datetime DESC
+
+";
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -320,10 +334,29 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+        if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+        } else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+        }
+
+        // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
 
         // 10
-        echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
+
+        } else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
+        } else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
+        } else {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+        }
 
         // 11
         echo '</td>';
@@ -351,7 +384,7 @@ if ($result->rowCount() > 0) {
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-success"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
@@ -363,7 +396,7 @@ if ($result->rowCount() > 0) {
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-danger"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
@@ -413,6 +446,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -713,6 +748,9 @@ echo '</div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
                                 '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus =
+                                '';
                         } else {
                             approveStatus = 'ไม่พบสถานะ';
                         }
@@ -738,8 +776,35 @@ echo '</div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
                                 '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus2 =
+                                '';
                         } else {
                             approveStatus2 = 'ไม่พบสถานะ';
+                        }
+
+                        // เวลาเริ่มต้น
+                        var startTime;
+                        if (row['l_leave_start_time'] == '12:00:00') {
+                            startTime = '11:45:00';
+                        } else if (row['l_leave_start_time'] == '13:00:00') {
+                            startTime = '12:45:00';
+                        } else if (row['l_leave_start_time'] == '17:00:00') {
+                            startTime = '16:40:00';
+                        } else {
+                            startTime = row['l_leave_start_time'];
+                        }
+
+                        // เวลาสิ้นสุด
+                        var endTime;
+                        if (row['l_leave_end_time'] == '12:00:00') {
+                            endTime = '11:45:00';
+                        } else if (row['l_leave_end_time'] == '13:00:00') {
+                            endTime = '12:45:00';
+                        } else if (row['l_leave_end_time'] == '17:00:00') {
+                            endTime = '16:40:00';
+                        } else {
+                            endTime = row['l_leave_end_time'];
                         }
 
                         var newRow = '<tr class="align-middle">' +
@@ -845,14 +910,14 @@ echo '</div>';
                             // 9
                             '<td>' + (row['l_leave_start_date'] ? row[
                                 'l_leave_start_date'] : '') + '<br>' +
-                            ' ' + (row[
-                                'l_leave_start_time'] ? row['l_leave_start_time'] : '') +
+                            ' ' + (startTime ? startTime : '') +
                             '</td>' +
 
                             // 10
                             '<td>' + (row['l_leave_end_date'] ? row['l_leave_end_date'] :
-                                '') + '<br>' + ' ' + (row['l_leave_end_time'] ? row[
-                                'l_leave_end_time'] : '') + '</td>';
+                                '') + '<br>' +
+                            ' ' + (endTime ? endTime : '') +
+                            '</td>';
                         // 11
                         if (row['l_file']) {
                             newRow +=

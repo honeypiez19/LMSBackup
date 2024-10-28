@@ -3,15 +3,42 @@ include '../connect.php';
 
 if (isset($_POST['userCode'])) {
     $userCode = $_POST['userCode'];
+    $currentYear = date("Y");
+    $lastYear = $currentYear - 1;
 
-    // สร้างคำสั่ง SQL เพื่อดึงข้อมูลประวัติการลา
-    $sql = "SELECT * FROM leave_list WHERE l_usercode = :userCode
-    AND l_leave_id <> 6
-    AND l_leave_id <> 7
-    ORDER BY l_create_datetime DESC";
+    $sql = "SELECT * FROM leave_list 
+            WHERE l_usercode = :userCode
+            AND (
+                (l_leave_id IN (1, 2, 3, 4, 8) 
+                AND l_create_datetime BETWEEN :startDateLastYear AND :endDateThisYear) 
+                OR (l_leave_id = 5 
+                AND l_create_datetime BETWEEN :startDateThisYear AND :endDateThisYear)
+            )
+            ORDER BY l_create_datetime DESC";
+
     $stmt = $conn->prepare($sql);
     $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
+
+    // กำหนดช่วงวันที่ตามเงื่อนไข
+    $startDateLastYear = "$lastYear-12-01";
+    $endDateThisYear = "$currentYear-11-30";
+    $startDateThisYear = "$currentYear-01-01";
+    $endDateThisYear = "$currentYear-12-31";
+
+    $stmt->bindParam(':startDateLastYear', $startDateLastYear);
+    $stmt->bindParam(':endDateThisYear', $endDateThisYear);
+    $stmt->bindParam(':startDateThisYear', $startDateThisYear);
+    $stmt->bindParam(':endDateThisYear', $endDateThisYear);
+
     $stmt->execute();
+    // สร้างคำสั่ง SQL เพื่อดึงข้อมูลประวัติการลา
+    // $sql = "SELECT * FROM leave_list WHERE l_usercode = :userCode
+    // AND l_leave_id <> 6
+    // AND l_leave_id <> 7
+    // ORDER BY l_create_datetime DESC";
+    // $stmt = $conn->prepare($sql);
+    // $stmt->bindParam(':userCode', $userCode, PDO::PARAM_STR);
+    // $stmt->execute();
 
     $rowCount = $stmt->rowCount();
     if ($rowCount > 0) {
@@ -62,8 +89,30 @@ if (isset($_POST['userCode'])) {
             }
             echo '</td>';
 
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+            // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+            // echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+
+            // 9
+            if ($row['l_leave_start_time'] == '12:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+            } else if ($row['l_leave_start_time'] == '13:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+            } else if ($row['l_leave_start_time'] == '17:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+            } else {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+            }
+            // 10
+            if ($row['l_leave_end_time'] == '12:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+
+            } else if ($row['l_leave_end_time'] == '13:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+            } else if ($row['l_leave_end_time'] == '17:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+            } else {
+                echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+            }
 
             echo '<td>';
             if ($row['l_leave_status'] == 0) {
@@ -134,7 +183,7 @@ if (isset($_POST['userCode'])) {
                 echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
             }
             // ค่าว่าง
-            elseif ($row['l_approve_status'] == 6) {
+            elseif ($row['l_approve_status2'] == 6) {
                 echo '';
             }
             // ไม่มีสถานะ

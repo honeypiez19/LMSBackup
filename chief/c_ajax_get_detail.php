@@ -2,6 +2,12 @@
 include '../connect.php';
 if (isset($_POST['leaveType'])) {
     $leaveType = $_POST['leaveType'];
+    $userCode = $_POST['userCode'];
+    $selectedYear = $_POST['selectedYear'];
+
+    // คำนวณวันที่เริ่มต้นและสิ้นสุดตามปีที่เลือก
+    $startDate = date(($selectedYear - 1) . "-12-01"); // วันที่เริ่มต้น 1 ธันวาคมของปีที่เลือก
+    $endDate = date(($selectedYear) . "-11-30"); // วันที่สิ้นสุด 30 พฤศจิกายนของปีถัดไป
 
     if ($leaveType == 'ลากิจได้รับค่าจ้าง') {
         $conType = str_replace("ลากิจได้รับค่าจ้าง", "1", $leaveType);
@@ -21,30 +27,30 @@ if (isset($_POST['leaveType'])) {
         $conType = str_replace("อื่น ๆ", "8", $leaveType);
     } else {
         echo 'ไม่มีประเภทการลา';
-        exit;
     }
 
+    // ทำความสะอาดข้อมูลก่อนนำไปใช้ใน SQL
+    $userCodeQuoted = $conn->quote($userCode);
+    $conTypeQuoted = $conn->quote($conType);
+    $startDateQuoted = $conn->quote($startDate);
+    $endDateQuoted = $conn->quote($endDate);
+
     // ดึงข้อมูลการลาจากฐานข้อมูล
-    $sql = "SELECT * FROM leave_list WHERE l_leave_id = '$conType' ORDER BY l_create_datetime";
+    $sql = "SELECT * FROM leave_list
+            WHERE l_leave_id = $conTypeQuoted
+            AND l_usercode = $userCodeQuoted
+            AND l_leave_start_date BETWEEN $startDateQuoted AND $endDateQuoted
+            ORDER BY l_leave_start_date DESC";
     $result = $conn->query($sql);
     $totalRows = $result->rowCount();
-    $rowNumber = $totalRows; // Start with the total number of rows
-
-    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
+    $rowNumber = $totalRows; // Start with the total number of rows    // ตรวจสอบว่ามีข้อมูลการลาหรือไม่
     if ($totalRows > 0) {
         echo '<h5>' . $leaveType . '</h5>';
         echo '<table class="table table-hover" >';
         echo '<thead>';
         echo '<tr class="text-center align-middle">';
         echo '<th rowspan="2">ลำดับ</th>';
-
-        // Change the header text based on the leave type
-        if ($leaveType == 'มาสาย') {
-            echo '<th rowspan="2">วันที่มาสาย</th>';
-        } else {
-            echo '<th rowspan="2">วันที่ยื่น</th>';
-        }
-
+        echo '<th rowspan="2">วันที่ยื่น</th>';
         echo '<th rowspan="2">ประเภทรายการ</th>';
         echo '<th colspan="2">วันเวลา</th>';
         echo '<th rowspan="2">สถานะรายการ</th>';
@@ -88,8 +94,29 @@ if (isset($_POST['leaveType'])) {
             }
             echo '</td>';
 
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+            // 9
+            if ($row['l_leave_start_time'] == '12:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
+            } else if ($row['l_leave_start_time'] == '13:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
+            } else if ($row['l_leave_start_time'] == '17:00:00') {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+            } else {
+                echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+            }
+
+// echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
+
+// 10
+            if ($row['l_leave_end_time'] == '12:00:00') {
+                echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
+            } else if ($row['l_leave_end_time'] == '13:00:00') {
+                echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
+            } else if ($row['l_leave_end_time'] == '17:00:00') {
+                echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
+            } else {
+                echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
+            }
 
             echo '<td>';
             if ($row['l_leave_status'] == 1) {
@@ -124,6 +151,9 @@ if (isset($_POST['leaveType'])) {
             elseif ($row['l_approve_status'] == 5) {
                 echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
             }
+            elseif ($row['l_approve_status'] == 6) {
+                echo '';
+            }
             // ไม่มีสถานะ
             else {
                 echo 'ไม่พบสถานะ';
@@ -155,6 +185,9 @@ if (isset($_POST['leaveType'])) {
             elseif ($row['l_approve_status2'] == 5) {
                 echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
             }
+            elseif ($row['l_approve_status2'] == 6) {
+                echo '';
+            }
             // ไม่มีสถานะ
             else {
                 echo 'ไม่พบสถานะ';
@@ -165,22 +198,26 @@ if (isset($_POST['leaveType'])) {
             if ($row['l_hr_status'] == 0) {
                 echo '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
             } elseif ($row['l_hr_status'] == 1) {
-                echo '<div class="text-success"><b>เสร็จสิ้น</b></div>';
+                echo '<div class="text-success"><b>ผ่าน</b></div>';
             } elseif ($row['l_hr_status'] == 2) {
-                echo '<div class="text-danger"><b>ไม่อนุมัติ</b></div>';
+                echo '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
             } else {
                 echo 'ไม่พบสถานะ';
             }
             echo '</td>';
+
             echo '</tr>';
             $rowNumber--;
         }
 
         echo '</tbody>';
         echo '</table>';
+
     } else {
-        echo 'ไม่พบข้อมูลการลาสำหรับประเภทการลานี้';
+        // ถ้าไม่มีข้อมูลการลา
+        echo '<div class="leave-details">';
+        echo '<h4>' . $leaveType . '</h4>';
+        echo '<p>ไม่มีข้อมูลการลา</p>';
+        echo '</div>';
     }
-} else {
-    echo 'ไม่พบข้อมูลประเภทการลา';
 }
