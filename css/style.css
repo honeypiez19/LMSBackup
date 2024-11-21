@@ -52,6 +52,14 @@ button[type="button"] {
   width: 100%;
   padding: 10px;
 }
+/* edit by pim */
+td.text-color-custom{
+  /* color: #3a7bd5; */
+  /* color: green; */
+  background-color: #CFE2FF;
+  border: 1px solid rgb(201, 199, 199);
+}
+/* edit by pim */
 
 .form-group button {
   width: 100%;
@@ -148,3 +156,43 @@ button[type="button"] {
 #imgNoBtn {
   border-radius: 100px 100px 100px 100px;
 }
+
+/* edit by pim */
+/* พื้นฐานของการ์ด */
+.card {
+  position: relative;
+  overflow: hidden;
+  /* ซ่อนส่วนที่เกิน */
+  z-index: 1;
+  cursor: pointer;
+  /* เปลี่ยนเคอร์เซอร์เมื่อ Hover */
+}
+
+/* สร้าง Backdrop Layer */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0);
+  /* ไม่มีสีเมื่อปกติ */
+  transition: background 0.3s ease;
+  /* ทำให้เปลี่ยนสีอย่างนุ่มนวล */
+  z-index: -1;
+  /* อยู่ด้านหลังเนื้อหา */
+}
+
+/* เอฟเฟกต์เมื่อ Hover */
+.card:hover::before {
+  background: rgba(0, 0, 0, 0.2);
+  /* โปร่งใสเล็กน้อย */
+}
+
+/* เอฟเฟกต์เมื่อ Active */
+.card.active::before {
+  background: rgba(0, 0, 0, 0.4);
+  /* โปร่งใสเข้มขึ้น */
+}
+/* edit by pim */

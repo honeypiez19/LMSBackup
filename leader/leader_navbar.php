@@ -3,6 +3,7 @@
 date_default_timezone_set('Asia/Bangkok'); // Set the timezone to Asia/Bangkok
 
 include '../connect.php';
+include '../session_lang.php';
 
 if (isset($_SESSION['s_usercode'])) {
     $userCode = $_SESSION['s_usercode'];
@@ -83,6 +84,8 @@ if (isset($_POST['logoutButton'])) {
     <nav class="navbar navbar-expand-lg"
         style="background-color: #072ac8; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); border: none;">
         <div class="container-fluid">
+            <!-- <h5 style="color: white;">LMS</h5> -->
+            <label style="color: white; font-size:20px;"><b>LMS</b></label>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
                 aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -91,30 +94,34 @@ if (isset($_POST['logoutButton'])) {
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="leader_dashboard.php"
-                            style="color: white;">หน้าหลัก</a>
+                            style="color: white;"><?php echo $strDash;?></a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false" style="color: white;">
-                            การลาและการมาสาย
+                            <?php echo $strLeaveAndLate;?>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="leader_leave.php">สถิติการลาและการมาสาย</a></li>
-                            <li><a class="dropdown-item" href="leader_history.php">ประวัติการลาและการมาสาย</a></li>
+                            <li><a class="dropdown-item" href="leader_leave.php"><?php echo $strStatistics;?></a></li>
+                            <li><a class="dropdown-item" href="leader_history.php"><?php echo $strHistory;?>
+                                </a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false" style="color: white;">
-                            พนักงาน
+                            <?php echo $strEmp;?>
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="leader_leave_request.php">ใบลาของพนักงาน</a></li>
-                            <li><a class="dropdown-item" href="leader_employee_leave.php">การลาของพนักงาน</a></li>
-                            <li><a class="dropdown-item" href="leader_employee_attendance.php">พนักงานมาสาย</a>
+                            <li><a class="dropdown-item"
+                                    href="leader_leave_request.php"><?php echo $strEmpLeaveForm;?></a>
                             </li>
-                        </ul>
-                    </li>
+                            <li><a class="dropdown-item"
+                                    href="leader_employee_leave.php"><?php echo $strEmpLeaveSta;?></a></li>
+                            <li><a class="dropdown-item"
+                                    href="leader_employee_attendance.php"><?php echo $strEmpLeaveLate;?></a>
+                            </li>
+                        </ul </li>
                 </ul>
                 <form method="post">
                     <ul class="nav justify-content-end">
@@ -131,12 +138,16 @@ if (isset($_POST['logoutButton'])) {
                         </li>
                         <?php endif; ?>
                         <li class="nav-item d-flex align-items-center">
-                            <a href="#"><img src="../logo/th.png" alt="TH Language"
-                                    style="width:30px;height:30px; margin: auto 0;"></a>
+                            <a href="../change_language.php?lang=TH&level=<?php echo $level; ?>">
+                                <img src="../logo/th.png" alt="TH Language"
+                                    style="width:30px;height:30px; margin: auto 0;">
+                            </a>
                         </li>
                         <li class="nav-item d-flex align-items-center">
-                            <a href="#" class="ms-2"><img src="../logo/en.png" alt="EN Language"
-                                    style="width:30px;height:30px; margin: auto 0;"></a>
+                            <a href="../change_language.php?lang=EN&level=<?php echo $level; ?>" class="ms-2">
+                                <img src="../logo/en.png" alt="EN Language"
+                                    style="width:30px;height:30px; margin: auto 0;">
+                            </a>
                         </li>
                         <li class="nav-item">
                             <button type="submit" name="logoutButton"
@@ -158,14 +169,17 @@ if (isset($_POST['logoutButton'])) {
                 </div>
                 <div class="modal-body">
                     <form id="changePasswordForm">
+                        <span class="text-danger">* ความยาวรหัสผ่านไม่เกิน 10 ตัวอักษร</span>
+
                         <div class="mb-3">
                             <label for="newPassword" class="form-label">รหัสผ่านใหม่</label>
-                            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                            <input type="password" class="form-control" id="newPassword" name="newPassword"
+                                maxlength="10" required>
                         </div>
                         <div class="mb-3">
                             <label for="confirmNewPassword" class="form-label">ยืนยันรหัสผ่านใหม่</label>
                             <input type="password" class="form-control" id="confirmNewPassword"
-                                name="confirmNewPassword" required>
+                                name="confirmNewPassword" maxlength="10" required>
                         </div>
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">เปลี่ยนรหัสผ่าน</button>

@@ -16,7 +16,7 @@ $userCode = $_SESSION['s_usercode'];
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=2.0">
     <title>ใบลาของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
@@ -122,55 +122,21 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
-// em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
-// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-// AND Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth'
-// AND l_level = 'user'
-// AND l_leave_id <> 6
-// AND l_leave_id <> 7";
-$sql = "SELECT 
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
 INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    -- AND li.l_approve_status = 0
-    li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+ON li.l_usercode = em.e_usercode
+AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
-                                <?php echo htmlspecialchars($totalLeaveItems); ?>
+                                <?php echo $totalLeaveItems; ?>
+                                <!-- <i class="mt-4 fas fa-file-alt ml-2 fa-2xl"></i> -->
                                 <i class="mt-4 fa-regular fa-folder-open fa-2xl"></i>
                             </div>
                         </h5>
@@ -190,44 +156,16 @@ if ($stmt->execute()) {
 // $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Year(l_create_datetime) = '$selectedYear'
 // AND Month(l_create_datetime) = '$selectedMonth' AND l_department = '$depart' AND l_level = 'user'
 // AND l_approve_status = 0 AND l_leave_id <> 6 AND l_leave_id <> 7";
-$sql = "SELECT
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_approve_status = 0
-    AND li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7
+AND l_approve_status = 0";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -247,44 +185,16 @@ if ($stmt->execute()) {
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_approve_status = 2
-    AND li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7
+AND l_approve_status = 2";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -304,44 +214,16 @@ if ($stmt->execute()) {
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT
-COUNT(li.l_list_id) AS totalLeaveItems,
-em.*,
-li.*
-FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_approve_status = 3
-    AND li.l_level = 'user'
-    AND li.l_leave_id NOT IN (6, 7)
-    AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
-    )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
-$stmt = $conn->prepare($sql);
-
-// Bind parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
-// Execute and check for errors
-if ($stmt->execute()) {
-    $totalLeaveItems = $stmt->fetchColumn();
-} else {
-    // Output error information
-    $errorInfo = $stmt->errorInfo();
-    echo "SQL Error: " . $errorInfo[2];
-    $totalLeaveItems = 0;
-}
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems, em.e_sub_department, em.e_sub_department2 ,
+em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5 FROM leave_list li
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7
+AND l_approve_status = 3";
+$totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
                                 <?php echo $totalLeaveItems; ?>
@@ -393,7 +275,6 @@ if ($stmt->execute()) {
                 </thead>
                 <tbody class="text-center">
                     <?php
-// echo $subDepart;
 $itemsPerPage = 10;
 
 // คำนวณหน้าปัจจุบัน
@@ -402,58 +283,15 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-
-// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
-// FROM leave_list li
-// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
-// AND Year(l_create_datetime) = '$selectedYear'
-// AND Month(l_create_datetime) = '$selectedMonth'
-// AND l_level = 'user'
-// AND l_leave_id <> 6
-// AND l_leave_id <> 7
-// ORDER BY l_create_datetime DESC";
-echo $depart;
-$sql = "SELECT
-    li.*,
-    em.e_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+$sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
 FROM leave_list li
-INNER JOIN employees em
-    ON li.l_usercode = em.e_usercode
-WHERE
-    li.l_approve_status IN (0, 1, 2, 3, 6)
-    AND li.l_level IN ('user')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = '$selectedYear'
-    AND MONTH(li.l_create_datetime) = '$selectedMonth'
-    AND (
-        -- If department is 'Management', check specific sub-departments
-        (em.e_department = 'Office' AND 
-            li.l_department IN ('$subDepart', '$subDepart2', '$subDepart3', '$subDepart4', '$subDepart5')
-        )
-        OR
-        -- General department or sub-department matching conditions
-        (
-            (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-            OR (li.l_department = '$subDepart2')
-            OR (li.l_department = '$subDepart3')
-            OR (li.l_department = '$subDepart4')
-            OR (li.l_department = '$subDepart5')
-        )
-        OR
-        (em.e_department = '$depart' AND li.l_department = '$depart')
-        OR (li.l_department = '$subDepart')
-        OR (li.l_department = '$subDepart2')
-        OR (li.l_department = '$subDepart3')
-        OR (li.l_department = '$subDepart4')
-        OR (li.l_department = '$subDepart5')
-    )
+INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+AND Year(l_leave_end_date) = '$selectedYear'
+AND Month(l_leave_end_date) = '$selectedMonth'
+AND l_level = 'user'
+AND l_leave_id <> 6
+AND l_leave_id <> 7
 ORDER BY l_create_datetime DESC";
-
 
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
@@ -546,26 +384,119 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        if ($row['l_leave_start_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        // 08:45
+        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
         }
-        // 10
-        if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
 
-        } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+// 10
+        // 08:45
+        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
+
         // 11
         echo '</td>';
         if (!empty($row['l_file'])) {
@@ -824,6 +755,7 @@ echo '</div>';
             var status = '2'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
             // alert(leaveStatus)
             $.ajax({
@@ -841,11 +773,21 @@ echo '</div>';
                     leaveEndDate: leaveEndDate,
                     depart: depart,
                     empName: empName,
-                    leaveStatus: leaveStatus
+                    leaveStatus: leaveStatus,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'อนุมัติใบลาสำเร็จ !',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result
+                            .isConfirmed) {
+                            location.reload();
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -913,6 +855,7 @@ echo '</div>';
             var status = '3'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
             var reason = reasonNoProve;
 
@@ -932,18 +875,20 @@ echo '</div>';
                     depart: depart,
                     leaveStatus: leaveStatus,
                     empName: empName,
-                    reasonNoProve: reasonNoProve
+                    reasonNoProve: reasonNoProve,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal
                     Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ทำรายการเสร็จสิ้น',
+                        title: 'ไม่อนุมัติสำเร็จ !',
+                        // text: 'ทำรายการเสร็จสิ้น',
                         icon: 'success',
                         confirmButtonText: 'ตกลง'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                            location
+                                .reload(); // โหลดหน้าใหม่เมื่อกดตกลง
                         }
                     });
                 },
@@ -952,9 +897,17 @@ echo '</div>';
                 }
             });
         }
+
     });
 
     $(".filter-card").click(function() {
+        /* edit by pim */
+        // ลบ active จากการ์ดทั้งหมด
+        $(".filter-card .card").removeClass("active");
+
+        // เพิ่ม active ให้การ์ดภายใน filter-card ที่คลิก
+        $(this).find(".card").addClass("active");
+
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
         var depart = <?php echo json_encode($depart); ?>;
@@ -1216,6 +1169,7 @@ echo '</div>';
                                 '') + '<br>' +
                             ' ' + (endTime ? endTime : '') +
                             '</td>';
+
                         // 11
                         if (row['l_file']) {
                             newRow +=
@@ -1341,10 +1295,10 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
+                                var level = '<?php echo $level; ?>';
 
                                 $.ajax({
                                     url: 'c_ajax_upd_status.php',
@@ -1361,12 +1315,21 @@ echo '</div>';
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
                                         leaveStatus: leaveStatus,
-                                        empName: empName
+                                        empName: empName,
+                                        level: level
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
-                                        location
-                                            .reload(); // Reload the page after successful update
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'อนุมัติใบลาสำเร็จ !',
+                                            confirmButtonText: 'ตกลง'
+                                        }).then((result) => {
+                                            if (result
+                                                .isConfirmed) {
+                                                location.reload();
+                                            }
+                                        });
                                     },
                                     error: function(xhr, status, error) {
                                         console.error(error);
@@ -1441,6 +1404,7 @@ echo '</div>';
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+                            var level = '<?php echo $level; ?>';
 
                             var reason = reasonNoProve;
 
@@ -1460,13 +1424,14 @@ echo '</div>';
                                     depart: depart,
                                     leaveStatus: leaveStatus,
                                     empName: empName,
-                                    reasonNoProve: reasonNoProve
+                                    reasonNoProve: reasonNoProve,
+                                    level: level
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide'); // ปิด modal
                                     Swal.fire({
-                                        title: 'สำเร็จ!',
-                                        text: 'ทำรายการเสร็จสิ้น',
+                                        title: 'ไม่อนุมัติสำเร็จ !',
+                                        // text: 'ทำรายการเสร็จสิ้น',
                                         icon: 'success',
                                         confirmButtonText: 'ตกลง'
                                     }).then((result) => {

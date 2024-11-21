@@ -13,11 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $level = $_POST['level'];
     $workplace = $_POST['workplace'];
     $subDepart = $_POST['subDepart'];
-    $subDepart2 = $_POST['subDepart2'];
-    $subDepart3 = $_POST['subDepart3'];
-    $subDepart4 = $_POST['subDepart4'];
-    $subDepart5 = $_POST['subDepart5'];
-
     $addUserName = $_POST['addUserName'];
 
     $leaveType = $_POST['leaveType'];
@@ -107,20 +102,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         // 
-    } else if(($level == 'leader' || $level == 'chief' )){
+    } else if(($level == 'leader')){
          // RD
         if($depart == 'RD'){
-            $proveStatus = 2;
+            $proveStatus = 0;
             $proveStatus2 = 1;
             $comfirmStatus = 0;
         } 
         else if($depart == 'Office'){
             if($subDepart == 'Store' || $subDepart == 'AC' || $subDepart == 'Sales'){
-                $proveStatus = 2;
+                $proveStatus = 0;
                 $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else if($subDepart == ''){
-                $proveStatus = 2;
+                $proveStatus = 0;
                 $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else {
@@ -129,15 +124,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }  // CAD1 / CAD2 / CAM
         else if($depart == 'CAD1' || $depart == 'CAD2' || $depart = 'CAM'){
             if($subDepart == 'Modeling' || $subDepart == 'Design'){
-                $proveStatus = 2;
+                $proveStatus = 0;
                 $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else if($subDepart == 'CAD2'){
-                $proveStatus = 2;
+               $proveStatus = 0;
                 $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else if($subDepart == 'CAM'){
-                $proveStatus = 2;
+                $proveStatus = 0;
                 $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else {
@@ -145,25 +140,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
         else if($depart == 'Management'){
-            $proveStatus = 6;
-            $proveStatus2 = 4;
-            $comfirmStatus = 0;
+            if($subDepart == 'AC' || $subDepart == 'Sales'){
+                $proveStatus = 0;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            }
         }
-    } else if(($level == 'manager' || $level == 'assisManager')){
+    } 
+    else if(($level == 'chief')){
+        if($depart == 'Management'){
+            if($subDepart == 'AC' || $subDepart == 'Sales'){
+                $proveStatus = 0;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            }
+        }
+    }
+    else if(($level == 'assisManager')){
+        if($depart == 'Management'){
+            if($subDepart == 'CAD1'){
+                $proveStatus = 0;
+                $proveStatus2 = 1;
+                $comfirmStatus = 0;
+            }
+        }
+    }
+    else if(($level == 'manager')){
            // RD
         if($depart == 'RD'){
-            $proveStatus = 6;
-            $proveStatus2 = 4;
+            $proveStatus = 0;
+            $proveStatus2 = 1;
             $comfirmStatus = 0;
         } 
         else if($depart == 'Office'){
             if($subDepart == 'Store' || $subDepart == 'AC' || $subDepart == 'Sales'){
-                $proveStatus = 6;
-                $proveStatus2 = 4;
+                $proveStatus = 0;
+                $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else if($subDepart == ''){
-                $proveStatus = 6;
-                $proveStatus2 = 4;
+                $proveStatus = 0;
+                $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else {
                 echo 'ไม่พบแผนก';
@@ -171,31 +187,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }  // CAD1 / CAD2 / CAM
         else if($depart == 'CAD1' || $depart == 'CAD2' || $depart = 'CAM'){
             if($subDepart == 'Modeling' || $subDepart == 'Design'){
-                $proveStatus = 6;
-                $proveStatus2 = 4;
+                $proveStatus = 0;
+                $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else if($subDepart == 'CAD2'){
-                $proveStatus = 6;
-                $proveStatus2 = 4;
+                $proveStatus = 0;
+                $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else if($subDepart == 'CAM'){
-                $proveStatus = 6;
-                $proveStatus2 = 4;
+                $proveStatus = 0;
+                $proveStatus2 = 1;
                 $comfirmStatus = 0;
             } else {
                 echo 'ไม่พบแผนก';
             }
         } else if($depart == 'Management'){
-            if($subDepart == 'CAD1' || $subDepart2 == 'CAD2' || $subDepart3 == 'CAM'){
-                $proveStatus = 6;
-                $proveStatus2 = 4;
+                $proveStatus = 0;
+                $proveStatus2 = 1;
                 $comfirmStatus = 0;
-            }
-            else {
-                $proveStatus = 6;
-                $proveStatus2 = 4;
-                $comfirmStatus = 0;
-            }  
         }
     }
     

@@ -17,7 +17,7 @@ $userCode = $_SESSION['s_usercode'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>การมาสายของพนักงาน</title>
+    <title>การมาสายและหยุดงานของพนักงาน</title>
 
     <link href="../css/bootstrap.min.css" rel="stylesheet">
     <link href="../css/style.css" rel="stylesheet">
@@ -42,7 +42,7 @@ $userCode = $_SESSION['s_usercode'];
                     <i class="fa-solid fa-user-clock fa-2xl"></i>
                 </div>
                 <div class="col-auto">
-                    <h3>ข้อมูลการมาสายของพนักงาน</h3>
+                    <h3>ข้อมูลมาสายและหยุดงานของพนักงาน</h3>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@ $userCode = $_SESSION['s_usercode'];
     <div class="mt-5 container-fluid">
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#tab1">การมาสาย</a>
+                <a class="nav-link active" data-bs-toggle="tab" href="#tab1">มาสายและหยุดงาน</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="tab" href="#tab2">ประวัติพนักงานมาสาย</a>
@@ -134,69 +134,78 @@ if (!isset($_GET['page'])) {
 } else {
     $currentPage = $_GET['page'];
 }
-// คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT 
--- li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
--- FROM leave_list li
--- INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
--- AND Year(l_create_datetime) = '$selectedYear'
--- AND Month(l_create_datetime) = '$selectedMonth'
--- AND l_level = 'user'
--- AND l_leave_id = 7
-    em.*,
-    li.*
+
+$sql = "SELECT
+    li.*,
+    em.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_leave_status = 0
-    AND li.l_approve_status = 0
-    AND li.l_level = 'user'
-    AND li.l_leave_id = 7
+WHERE
+    li.l_approve_status IN (0, 1, 2, 3, 6)
+    AND li.l_level IN ('user')
+    AND li.l_leave_id IN (6,7)
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth
     AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_hr_create_datetime) = :selectedYear
-    AND MONTH(li.l_hr_create_datetime) = :selectedMonth
-ORDER BY l_hr_create_datetime DESC";
-
-// Count total rows for pagination
-$countQuery = $conn->prepare($sql);
-$countQuery->bindParam(':subDepart', $subDepart);
-$countQuery->bindParam(':subDepart2', $subDepart2);
-$countQuery->bindParam(':subDepart3', $subDepart3);
-$countQuery->bindParam(':subDepart4', $subDepart4);
-$countQuery->bindParam(':subDepart5', $subDepart5);
-$countQuery->bindParam(':selectedYear', $selectedYear);
-$countQuery->bindParam(':selectedMonth', $selectedMonth);
-$countQuery->execute();
-$totalRows = $countQuery->rowCount();
-
-// Calculate total pages and offset
-$totalPages = ceil($totalRows / $itemsPerPage);
-$offset = ($currentPage - 1) * $itemsPerPage;
-
-// Add LIMIT and OFFSET for pagination
-$sql .= " LIMIT :itemsPerPage OFFSET :offset";
+ORDER BY li.l_leave_end_date DESC";
+// Prepare the statement
 $stmt = $conn->prepare($sql);
 
-// Bind all parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-$stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+// Bind the parameters
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement to get total rows
 $stmt->execute();
 
-// Fetch results
+// Get total rows for pagination
+$totalRows = $stmt->rowCount();
+
+// Calculate total pages
+$totalPages = ceil($totalRows / $itemsPerPage);
+
+// Calculate offset for pagination
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Add LIMIT and OFFSET to the SQL query
+$sql .= " LIMIT :limit OFFSET :offset";
+
+// Prepare the statement again with the complete query
+$stmt = $conn->prepare($sql);
+
+// Bind the parameters again for pagination
+$stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+// Bind the previously bound parameters again
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement
+$stmt->execute();
+
+// Fetch the results
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Display results in a table
 if (count($result) > 0) {
     echo '<table class="table">';
     echo '<thead>';
@@ -215,7 +224,6 @@ if (count($result) > 0) {
         </tr>';
     echo '</thead>';
     echo '<tbody>';
-
     foreach ($result as $index => $row) {
         $rowNumber = $totalRows - ($offset + $index);
         echo '<tr class="text-center align-middle">';
@@ -242,8 +250,15 @@ if (count($result) > 0) {
         echo '<td>' . $row['l_name'] . '</td>';
 
         // 7
-        echo '<td>' . ($row['l_leave_id'] == 7 ? 'มาสาย' : $row['l_leave_id']) . '</td>';
-
+        echo '<td>';
+        if ($row['l_leave_id'] == 7) {
+            echo 'มาสาย';
+        } elseif ($row['l_leave_id'] == 6) {
+            echo 'หยุดงาน';
+        } else {
+            echo $row['l_leave_id'];
+        }
+        echo '</td>';
         // 8
         echo '<td>' . $row['l_leave_start_date'] . '<br>' . $row['l_leave_start_time'] . ' ถึง ' . $row['l_leave_end_time'] . '</td>';
 
@@ -455,80 +470,104 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 // คำสั่ง SQL เพื่อดึงข้อมูลมาสายและขาดงาน
-$sql = "SELECT 
-    em.*,
-    li.*
+// $sql = "SELECT li.*, em.e_sub_department, em.e_sub_department2 , em.e_sub_department3 , em.e_sub_department4, em.e_sub_department5
+// FROM leave_list li
+// INNER JOIN employees em ON li.l_usercode = em.e_usercode AND em.e_sub_department = '$subDepart'
+// AND Year(l_hr_create_datetime) = '$selectedYear'
+// AND Month(l_hr_create_datetime) = '$selectedMonth'
+// AND l_level = 'user'
+// AND l_leave_id = 7
+// ORDER BY l_hr_create_datetime DESC";
+// $result = $conn->query($sql);
+// $totalRows = $result->rowCount();
+$sql = "SELECT
+    li.*,
+    em.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
-    li.l_leave_status = 0
-    AND li.l_approve_status = 2
-    AND li.l_level = 'user'
+WHERE
+    li.l_approve_status IN (0, 1, 2, 3, 6)
+    AND li.l_level IN ('user')
     AND li.l_leave_id = 7
+    AND YEAR(li.l_leave_end_date) = :selectedYear
+    AND MONTH(li.l_leave_end_date) = :selectedMonth
     AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_hr_create_datetime) = :selectedYear
-    AND MONTH(li.l_hr_create_datetime) = :selectedMonth
-";
-
-// Count total rows for pagination
-$countQuery = $conn->prepare($sql);
-$countQuery->bindParam(':subDepart', $subDepart);
-$countQuery->bindParam(':subDepart2', $subDepart2);
-$countQuery->bindParam(':subDepart3', $subDepart3);
-$countQuery->bindParam(':subDepart4', $subDepart4);
-$countQuery->bindParam(':subDepart5', $subDepart5);
-$countQuery->bindParam(':selectedYear', $selectedYear);
-$countQuery->bindParam(':selectedMonth', $selectedMonth);
-$countQuery->execute();
-$totalRows = $countQuery->rowCount();
-
-// Calculate total pages and offset
-$totalPages = ceil($totalRows / $itemsPerPage);
-$offset = ($currentPage - 1) * $itemsPerPage;
-
-// Add LIMIT and OFFSET for pagination
-$sql .= " LIMIT :itemsPerPage OFFSET :offset";
+ORDER BY li.l_leave_end_date DESC";
+// Prepare the statement
 $stmt = $conn->prepare($sql);
 
-// Bind all parameters
-$stmt->bindParam(':subDepart', $subDepart);
-$stmt->bindParam(':subDepart2', $subDepart2);
-$stmt->bindParam(':subDepart3', $subDepart3);
-$stmt->bindParam(':subDepart4', $subDepart4);
-$stmt->bindParam(':subDepart5', $subDepart5);
-$stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-$stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+// Bind the parameters
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement to get total rows
 $stmt->execute();
 
-// Fetch results
+// Get total rows for pagination
+$totalRows = $stmt->rowCount();
+
+// Calculate total pages
+$totalPages = ceil($totalRows / $itemsPerPage);
+
+// Calculate offset for pagination
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Add LIMIT and OFFSET to the SQL query
+$sql .= " LIMIT :limit OFFSET :offset";
+
+// Prepare the statement again with the complete query
+$stmt = $conn->prepare($sql);
+
+// Bind the parameters again for pagination
+$stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+// Bind the previously bound parameters again
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+$stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+$stmt->bindParam(':subDepart', $subDepart, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart2', $subDepart2, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart3', $subDepart3, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart4', $subDepart4, PDO::PARAM_STR);
+$stmt->bindParam(':subDepart5', $subDepart5, PDO::PARAM_STR);
+$stmt->bindParam(':depart', $depart, PDO::PARAM_STR);
+
+// Execute the statement
+$stmt->execute();
+
+// Fetch the results
 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Display results in a table
 if (count($result) > 0) {
     echo '<table class="table">';
     echo '<thead>';
     echo '<tr class="text-center align-middle">
-        <th>ลำดับ</th>
-        <th>รหัสพนักงาน</th>
-        <th>ชื่อพนักงาน</th>
-        <th>ประเภท</th>
-        <th>วันที่มาสาย</th>
-        <th>สถานะรายการ</th>
-        <th>สถานะอนุมัติ_1</th>
-        <th>สถานะอนุมัติ_2</th>
-        <th>สถานะ (เฉพาะ HR)</th>
-        <th>หมายเหตุ</th>
-        <th></th>
-        </tr>';
+    <th>ลำดับ</th>
+    <th>รหัสพนักงาน</th>
+    <th>ชื่อพนักงาน</th>
+    <th>ประเภท</th>
+    <th>วันที่มาสาย</th>
+    <th>สถานะรายการ</th>
+    <th>สถานะอนุมัติ_1</th>
+    <th>สถานะอนุมัติ_2</th>
+    <th>สถานะ (เฉพาะ HR)</th>
+    <th>หมายเหตุ</th>
+    </tr>';
     echo '</thead>';
     echo '<tbody>';
-
     foreach ($result as $index => $row) {
         $rowNumber = $totalRows - ($offset + $index);
         echo '<tr class="text-center align-middle">';
@@ -949,6 +988,11 @@ if (count($result) > 0) {
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
             var level = '<?php echo $level; ?>';
+            var subDepart = '<?php echo $subDepart; ?>';
+            var subDepart2 = '<?php echo $subDepart2; ?>';
+            var subDepart3 = '<?php echo $subDepart3; ?>';
+            var subDepart4 = '<?php echo $subDepart4; ?>';
+            var subDepart5 = '<?php echo $subDepart5; ?>';
             var workplace = '<?php echo $workplace; ?>';
 
             var createDateTime = $(this).data(
@@ -959,14 +1003,15 @@ if (count($result) > 0) {
             var lateEnd = $(rowData[3]).text(); // เวลาสิ้นสุดที่มาสาย
             var userCode = $(rowData[5]).text();
             var name = $(rowData[6]).text();
+            var leaveType = $(rowData[7]).text();
             var leaveStatus = $(rowData[9]).text();
 
             // alert(workplace)
-            // alert(leaveStatus)
+            // alert(leaveType)
             $('.btn-approve').off('click');
-
             Swal.fire({
-                title: "ต้องการอนุมัติการมาสายหรือไม่ ?",
+                title: "ต้องการอนุมัติ" +
+                    leaveType + "หรือไม่ ?",
                 text: "กรุณายืนยันการอนุมัติ",
                 icon: "question",
                 showCancelButton: true,
@@ -1004,12 +1049,20 @@ if (count($result) > 0) {
                             leaveStatus: leaveStatus,
                             level: level,
                             workplace: workplace,
+                            leaveType: leaveType,
+                            subDepart: subDepart,
+                            subDepart2: subDepart2,
+                            subDepart3: subDepart3,
+                            subDepart4: subDepart4,
+                            subDepart5: subDepart5,
                             action: 'approve'
                         },
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                text: 'อนุมัติการมาสายของ ' + name +
+                                text: 'อนุมัติ' +
+                                    leaveType +
+                                    'ของ ' + name +
                                     ' ของวันที่ ' +
                                     lateDate,
                                 icon: 'success',
@@ -1044,12 +1097,19 @@ if (count($result) > 0) {
                             leaveStatus: leaveStatus,
                             level: level,
                             workplace: workplace,
+                            leaveType: leaveType,
+                            subDepart: subDepart,
+                            subDepart2: subDepart2,
+                            subDepart3: subDepart3,
+                            subDepart4: subDepart4,
+                            subDepart5: subDepart5,
                             action: 'deny'
                         },
                         success: function(response) {
                             Swal.fire({
                                 title: 'สำเร็จ',
-                                html: 'ไม่อนุมัติการมาสายของ ' + name +
+                                html: 'ไม่อนุมัติ' + leaveType +
+                                    'ของ ' + name +
                                     '<br>ของวันที่ ' + lateDate,
                                 icon: 'success',
                                 confirmButtonText: 'OK'

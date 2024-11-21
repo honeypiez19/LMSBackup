@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -47,11 +49,19 @@ $currentYear = date('Y'); // ปีปัจจุบัน
 
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 } else {
     $selectedYear = $currentYear;
 }
 
 echo "<select class='form-select' name='year' id='selectedYear'>";
+
+// เพิ่มตัวเลือกของปีหน้า
+$nextYear = $currentYear + 1;
+echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
+
 for ($i = 0; $i <= 4; $i++) {
     $year = $currentYear - $i;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
@@ -64,21 +74,22 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -108,9 +119,18 @@ echo "</select>";
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
-AND l_leave_id <> 6 AND l_leave_id <> 7";
+// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE Month(l_leave_end_date) = '$selectedMonth'
+// AND Year(l_leave_end_date) = '$selectedYear'
+// AND l_leave_id <> 6 AND l_leave_id <> 7";
+
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_leave_id NOT IN (6,7) ";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+}
+
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear'";
+
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -130,9 +150,18 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
-AND l_leave_id <> 6 AND l_leave_id <> 7";
+// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 0 AND Month(l_leave_end_date) = '$selectedMonth'
+// AND Year(l_leave_end_date) = '$selectedYear'
+// AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_leave_id NOT IN (6,7)
+AND l_hr_status = 0";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+}
+
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear'";
+
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 
 ?>
@@ -153,9 +182,17 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
-AND l_leave_id <> 6 AND l_leave_id <> 7";
+// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 1 AND Month(l_leave_end_date) = '$selectedMonth'
+// AND Year(l_leave_end_date) = '$selectedYear'
+// AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_leave_id NOT IN (6,7)
+AND l_hr_status = 1";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+}
+
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear'";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -175,9 +212,17 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <div class="card-body">
                         <h5 class="card-title">
                             <?php
-$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
-AND l_leave_id <> 6 AND l_leave_id <> 7";
+// $sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_hr_status = 2 AND Month(l_leave_end_date) = '$selectedMonth'
+// AND Year(l_leave_end_date) = '$selectedYear'
+// AND l_leave_id <> 6 AND l_leave_id <> 7";
+$sql = "SELECT COUNT(l_list_id) AS totalLeaveItems FROM leave_list WHERE l_leave_id NOT IN (6,7)
+AND l_hr_status = 2";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+}
+
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear'";
 $totalLeaveItems = $conn->query($sql)->fetchColumn();
 ?>
                             <div class="d-flex justify-content-between">
@@ -218,7 +263,12 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
                     <th rowspan="2"></th>
                 </tr>
                 <tr class="text-center">
-                    <th><input type="text" class="form-control" id="codeSearch"></th>
+                    <!-- <th><input type="text" class="form-control" id="codeSearch"></th>
+                      -->
+                    <?php $searchCode = isset($_GET['codeSearch']) ? $_GET['codeSearch'] : '';
+?>
+                    <th><input type="text" class="form-control" id="codeSearch"
+                            value="<?php echo htmlspecialchars($searchCode); ?>"></th>
                     <th><input type="text" class="form-control" id="nameSearch"></th>
                     <th><input type="text" class="form-control" id="leaveSearch"></th>
                     <!-- <th><input type="text" class="form-control" id="leaveSearch"></th> -->
@@ -228,7 +278,7 @@ $totalLeaveItems = $conn->query($sql)->fetchColumn();
             </thead>
             <tbody class="text-center">
                 <?php
-$itemsPerPage = 10;
+$itemsPerPage = 15;
 
 // คำนวณหน้าปัจจุบัน
 if (!isset($_GET['page'])) {
@@ -237,12 +287,15 @@ if (!isset($_GET['page'])) {
     $currentPage = $_GET['page'];
 }
 
-$sql = "SELECT * FROM leave_list WHERE Month(l_create_datetime) = '$selectedMonth' 
-AND Year(l_create_datetime) = '$selectedYear' 
-AND l_leave_id <> 6 
-AND l_leave_id <> 7 ORDER BY l_create_datetime DESC
+$sql = "SELECT * FROM leave_list WHERE l_leave_id NOT IN (6,7)
+AND l_usercode LIKE '%" . $searchCode . "%'";
 
-";
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+}
+
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear' ORDER BY l_create_datetime DESC";
+
 $result = $conn->query($sql);
 $totalRows = $result->rowCount();
 
@@ -334,27 +387,116 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        if ($row['l_leave_start_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        // 08:45
+        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+        }
+        // 09:45
+        else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+        }
+        // 10:45
+        else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
+        }
+        // 11:45
+        else if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
+        }
+        // 12:45
+        else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
+        }
+        // 13:10
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
+        }
+        // 13:40
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        }
+        // 14:10
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
+        }
+        // 14:40
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        }
+        // 15:10
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
+        }
+        // 15:40
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
+        // 16:10
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        }
+        // 16:40
+        else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
         }
 
-        // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-
         // 10
-        if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
-
-        } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
+        // 08:45
+        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+        }
+        // 09:45
+        else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+        }
+        // 10:45
+        else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
+        }
+        // 11:45
+        else if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 11:45:00</td>';
+        }
+        // 12:45
+        else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
+        }
+        // 13:10
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
+        }
+        // 13:40
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        }
+        // 14:10
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
+        }
+        // 14:40
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        }
+        // 15:10
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
+        }
+        // 15:40
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
+        // 16:10
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        }
+        // 16:40
+        else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
 
@@ -496,31 +638,36 @@ if ($result->rowCount() > 0) {
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
 
-// สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
 if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '&codeSearch=' . urlencode($searchCode) . '">&laquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '&codeSearch=' . urlencode($searchCode) . '">&lt;</a></li>';
 }
 
-// สร้างลิงก์สำหรับแต่ละหน้า
-for ($i = 1; $i <= $totalPages; $i++) {
+$startPage = max(1, $currentPage - 2);
+$endPage = min($totalPages, $currentPage + 2);
+
+for ($i = $startPage; $i <= $endPage; $i++) {
     if ($i == $currentPage) {
         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
     } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '&codeSearch=' . urlencode($searchCode) . '">' . $i . '</a></li>';
     }
 }
 
-// สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
 if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '&codeSearch=' . urlencode($searchCode) . '">&gt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '&codeSearch=' . urlencode($searchCode) . '">&raquo;</a></li>';
 }
 
 echo '</ul>';
+
+// Input to jump to a specific page
+echo '<input type="number" id="page-input" max="' . $totalPages . '" class="mx-2 form-control d-inline" style="width: 100px; height: 40px; text-align: center;" placeholder="เลขหน้า" value="' . $currentPage . '" onchange="changePage(this.value, \'' . $selectedMonth . '\', \'' . $searchCode . '\')">';
+
 echo '</div>';
 
 ?>
+
         <!-- Modal เช็คการลา -->
         <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -617,7 +764,15 @@ echo '</div>';
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: 'ตรวจสอบผ่านสำเร็จ',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง'
+                    }).then(() => {
+                        location
+                            .reload(); // Reload the page after user clicks confirm
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -657,7 +812,15 @@ echo '</div>';
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload();
+                    Swal.fire({
+                        title: 'สำเร็จ!',
+                        text: 'ตรวจสอบไม่ผ่านสำเร็จ',
+                        icon: 'success',
+                        confirmButtonText: 'ตกลง'
+                    }).then(() => {
+                        location
+                            .reload(); // Reload the page after user clicks confirm
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -667,15 +830,25 @@ echo '</div>';
     });
 
     $(".filter-card").click(function() {
+        /* edit by pim */
+        // ลบ active จากการ์ดทั้งหมด
+        $(".filter-card .card").removeClass("active");
+
+        // เพิ่ม active ให้การ์ดภายใน filter-card ที่คลิก
+        $(this).find(".card").addClass("active");
+
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
+        var selectedYear = $("#selectedYear").val();
 
+        // alert(status)
         $.ajax({
             url: 'a_ajax_get_leave_data.php',
             method: 'GET',
             data: {
                 status: status,
-                month: selectedMonth
+                month: selectedMonth,
+                year: selectedYear
             },
             dataType: 'json',
             success: function(data) {
@@ -685,6 +858,8 @@ echo '</div>';
                         '<tr><td colspan="19" class="text-danger" style="text-align: left;">ไม่พบข้อมูล</td></tr>'
                     );
                 } else {
+                    var totalItems = data.length;
+
                     $.each(data, function(index, row) {
                         var leaveType = '';
                         if (row['l_leave_id'] == 1) {
@@ -851,7 +1026,7 @@ echo '</div>';
                             '</td>' +
 
                             // 4
-                            '<td>' + (index + 1) + '</td>' +
+                            '<td>' + (totalItems - index) + '</td>' +
 
                             // 5
                             '<td>' + (row['l_usercode'] ? row['l_usercode'] : '') +
@@ -1082,8 +1257,15 @@ echo '</div>';
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
-                                        location
-                                            .reload();
+                                        Swal.fire({
+                                            title: 'สำเร็จ!',
+                                            text: 'ตรวจสอบผ่านสำเร็จ',
+                                            icon: 'success',
+                                            confirmButtonText: 'ตกลง'
+                                        }).then(() => {
+                                            location
+                                                .reload(); // Reload the page after user clicks confirm
+                                        });
                                     },
                                     error: function(xhr, status, error) {
                                         console.error(error);
@@ -1136,7 +1318,15 @@ echo '</div>';
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide');
-                                    location.reload();
+                                    Swal.fire({
+                                        title: 'สำเร็จ!',
+                                        text: 'ตรวจสอบไม่ผ่านสำเร็จ',
+                                        icon: 'success',
+                                        confirmButtonText: 'ตกลง'
+                                    }).then(() => {
+                                        location
+                                            .reload(); // Reload the page after user clicks confirm
+                                    });
                                 },
                                 error: function(xhr, status, error) {
                                     console.error(error);
@@ -1167,10 +1357,143 @@ echo '</div>';
     });
 
     $("#codeSearch").on("keyup", function() {
-        var value3 = $(this).val().toLowerCase();
-        $("tbody tr").filter(function() {
-            $(this).toggle($(this).text().toLowerCase().indexOf(value3) > -1);
+        var value3 = $(this).val().toLowerCase(); // ค่าที่กรอกในช่องค้นหา
+        var page = "<?php echo $currentPage; ?>"; // หน้าปัจจุบันที่แสดงอยู่
+        var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
+        var selectedYear = "<?php echo $selectedYear; ?>"; // ปีที่เลือก
+
+        var searchCode = value3; // ค่าของ codeSearch ที่กรอก
+
+        $.ajax({
+            url: "a_ajax_get_data_usercode.php", // ชื่อไฟล์ PHP ที่ใช้แสดงข้อมูล
+            type: "GET",
+            data: {
+                page: page,
+                month: selectedMonth,
+                year: selectedYear,
+                codeSearch: searchCode
+            },
+            success: function(response) {
+                // แทนที่เนื้อหาตารางด้วยข้อมูลใหม่ที่ได้จาก response
+                $("tbody").html(response);
+
+                // เปิด modal และกำหนดเนื้อหา
+                $(".leaveChk").click(function() {
+                    var rowData = $(this).closest("tr").find("td");
+                    var modalContent = '<table class="table table-bordered">' +
+                        '<tr><th>รหัสพนักงาน</th><td>' + $(rowData[5]).text() +
+                        '</td></tr>' +
+                        '<tr><th>ชื่อ - นามสกุล</th><td>' + $(rowData[1]).text() +
+                        '</td></tr>' +
+                        '<tr><th>แผนก</th><td>' + $(rowData[2]).text() + '</td></tr>' +
+                        '<tr><th>วันที่ยื่นใบลา</th><td>' + $(rowData[7]).text() +
+                        '</td></tr>' +
+                        '<tr><th>ประเภทการลา</th><td>' + $(rowData[0]).text() +
+                        '</td></tr>' +
+                        '<tr><th>เหตุผลการลา</th><td>' + $(rowData[3]).text() +
+                        '</td></tr>' +
+                        '<tr><th>วันเวลาที่ลา</th><td>' + $(rowData[9]).text() + ' ถึง ' +
+                        $(rowData[10]).text() + '</td></tr>' +
+                        '<tr><th>สถานะใบลา</th><td>' + $(rowData[12]).html() +
+                        '</td></tr>' +
+                        '</table>';
+
+                    $('#leaveModal .modal-body').html(modalContent);
+
+                    // ปรับปรุงปุ่มใน modal สำหรับ "สำเร็จ"
+                    $('.modal-footer .btn-success').off('click').on('click', function() {
+                        var modalData = {
+                            createDate: $(rowData[7]).text(),
+                            userCode: $(rowData[5]).text(),
+                            userName: '<?php echo $userName; ?>',
+                            leaveType: $(rowData[0]).text(),
+                            leaveReason: $(rowData[3]).text(),
+                            leaveStartDate: $(rowData[9]).text(),
+                            leaveEndDate: $(rowData[10]).text(),
+                            depart: $(rowData[2]).text(),
+                            checkFirm: '1', // ผ่าน
+                            empName: $(rowData[1]).text(),
+                            leaveStatus: $(rowData[12]).text()
+                        };
+
+                        $.ajax({
+                            url: 'a_ajax_upd_status.php',
+                            method: 'POST',
+                            data: modalData,
+                            success: function(response) {
+                                $('#leaveModal').modal('hide');
+                                location
+                                    .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(error);
+                            }
+                        });
+                    });
+
+                    // ปรับปรุงปุ่มใน modal สำหรับ "ไม่ผ่าน"
+                    $('.modal-footer .btn-danger').off('click').on('click', function() {
+                        var modalData = {
+                            createDate: $(rowData[7]).text(),
+                            userCode: $(rowData[5]).text(),
+                            userName: '<?php echo $userName; ?>',
+                            leaveType: $(rowData[0]).text(),
+                            leaveReason: $(rowData[3]).text(),
+                            leaveStartDate: $(rowData[9]).text(),
+                            leaveEndDate: $(rowData[10]).text(),
+                            depart: $(rowData[2]).text(),
+                            checkFirm: '2', // ไม่ผ่าน
+                            empName: $(rowData[1]).text(),
+                            leaveStatus: $(rowData[12]).text()
+                        };
+
+                        $.ajax({
+                            url: 'a_ajax_upd_status.php',
+                            method: 'POST',
+                            data: modalData,
+                            success: function(response) {
+                                $('#leaveModal').modal('hide');
+                                location
+                                    .reload(); // รีโหลดหน้าเมื่ออัพเดตเสร็จ
+                            },
+                            error: function(xhr, status, error) {
+                                console.error(error);
+                            }
+                        });
+                    });
+                });
+            }
         });
+    });
+
+
+    // ฟังก์ชันเพื่อเปลี่ยนหน้าเมื่อกรอกหมายเลขหน้า
+    // function changePage(page) {
+    //     var totalPages = <?php echo $totalPages; ?>; // จำนวนหน้าทั้งหมด
+    //     if (page < 1) page = 1;
+    //     if (page > totalPages) page = totalPages;
+
+    //     var selectedMonth = "<?php echo $selectedMonth; ?>"; // เดือนที่เลือก
+    //     var searchCode = $("#codeSearch").val(); // ค่าค้นหาจากช่องค้นหา
+
+    //     var newUrl = "?page=" + page + "&month=" + encodeURIComponent(selectedMonth) +
+    //         "&codeSearch=" + encodeURIComponent(searchCode); // ส่งค่า codeSearch ใหม่
+
+    //     window.location.href = newUrl; // เปลี่ยนหน้าโดยการโหลด URL ใหม่
+    // }
+
+    function changePage(page, selectedMonth, searchCode) {
+        // สร้าง URL ใหม่โดยส่งค่าทั้งหมด (page, selectedMonth, และ codeSearch)
+        var newUrl = "?page=" + page + "&month=" + encodeURIComponent(selectedMonth) +
+            "&codeSearch=" + encodeURIComponent(searchCode);
+        window.location.href = newUrl; // รีเฟรชหน้าโดยการโหลด URL ใหม่
+    }
+    document.getElementById('page-input').addEventListener('input', function() {
+        const page = this.value;
+        const month = '<?php echo urlencode($selectedMonth); ?>';
+        if (page >= 1 && page <= <?php echo $totalPages; ?>) {
+            window.location.href = `?page=${page}&month=${month}`;
+        }
     });
     </script>
     <script src="../js/popper.min.js"></script>

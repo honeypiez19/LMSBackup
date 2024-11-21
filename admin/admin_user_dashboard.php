@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -100,11 +102,19 @@ $currentYear = date('Y'); // ปีปัจจุบัน
 
 if (isset($_POST['year'])) {
     $selectedYear = $_POST['year'];
+
+    $startDate = date("Y-m-d", strtotime(($selectedYear - 1) . "-12-01"));
+    $endDate = date("Y-m-d", strtotime($selectedYear . "-11-30"));
 } else {
     $selectedYear = $currentYear;
 }
 
 echo "<select class='form-select' name='year' id='selectedYear'>";
+
+// เพิ่มตัวเลือกของปีหน้า
+$nextYear = $currentYear + 1;
+echo "<option value='$nextYear'" . ($nextYear == $selectedYear ? " selected" : "") . ">$nextYear</option>";
+
 for ($i = 0; $i <= 4; $i++) {
     $year = $currentYear - $i;
     echo "<option value='$year'" . ($year == $selectedYear ? " selected" : "") . ">$year</option>";
@@ -117,21 +127,22 @@ echo "</select>";
                     <div class="col-auto">
                         <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -151,7 +162,6 @@ echo "</select>";
                         </button>
                     </div>
                 </form>
-
 
                 <!-- ปุ่มระเบียบการลา -->
                 <button type="button" class="button-shadow btn btn-primary" data-bs-toggle="modal"
@@ -275,8 +285,7 @@ echo "</select>";
                     <div class="card-body">
                         <div class="card-title">
                             <?php
-// $approveStatus = ($depart == 'RD') ? 4 : 2;
-$approveStatus = ($depart == 'RD') ? 4 : (($depart == 'Office') ? 4 : ($depart == '' ? NULL : 2));
+// $approveStatus = ($depart == 'RD') ? 2 : (($depart == 'Office') ? 2 : ($depart == '' ? null : 2));
 // ลากิจได้รับค่าจ้าง ----------------------------------------------------------------
 $sql_leave_personal = "SELECT
     SUM(
@@ -302,15 +311,16 @@ FROM leave_list
 WHERE l_leave_id = 1
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
 ";
 
 $stmt_leave_personal = $conn->prepare($sql_leave_personal);
 $stmt_leave_personal->bindParam(':userCode', $userCode);
 $stmt_leave_personal->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt_leave_personal->bindParam(':approveStatus', $approveStatus);
+$stmt_leave_personal->bindParam(':startDate', $startDate);
+$stmt_leave_personal->bindParam(':endDate', $endDate);
 $stmt_leave_personal->execute();
 $result_leave_personal = $stmt_leave_personal->fetch(PDO::FETCH_ASSOC);
 
@@ -404,15 +414,16 @@ FROM leave_list
 WHERE l_leave_id = 2
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
+AND (l_leave_end_date BETWEEN :startDate AND :endDate)
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
 ";
 
 $stmt_leave_personal_no = $conn->prepare($sql_leave_personal_no);
 $stmt_leave_personal_no->bindParam(':userCode', $userCode);
 $stmt_leave_personal_no->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt_leave_personal_no->bindParam(':approveStatus', $approveStatus);
+$stmt_leave_personal_no->bindParam(':startDate', $startDate);
+$stmt_leave_personal_no->bindParam(':endDate', $endDate);
 $stmt_leave_personal_no->execute();
 $result_leave_personal_no = $stmt_leave_personal_no->fetch(PDO::FETCH_ASSOC);
 
@@ -500,14 +511,12 @@ WHERE l_leave_id = 3
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
 ";
 
 $stmt_leave_sick = $conn->prepare($sql_leave_sick);
 $stmt_leave_sick->bindParam(':userCode', $userCode);
 $stmt_leave_sick->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt_leave_sick->bindParam(':approveStatus', $approveStatus);
 $stmt_leave_sick->execute();
 $result_leave_sick = $stmt_leave_sick->fetch(PDO::FETCH_ASSOC);
 
@@ -598,14 +607,12 @@ WHERE l_leave_id = 4
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
 ";
 
 $stmt_leave_sick_work = $conn->prepare($sql_leave_sick_work);
 $stmt_leave_sick_work->bindParam(':userCode', $userCode);
 $stmt_leave_sick_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt_leave_sick_work->bindParam(':approveStatus', $approveStatus);
 $stmt_leave_sick_work->execute();
 $result_leave_sick_work = $stmt_leave_sick_work->fetch(PDO::FETCH_ASSOC);
 
@@ -694,14 +701,12 @@ WHERE l_leave_id = 5
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
 ";
 
 $stmt_leave_annual = $conn->prepare($sql_leave_annual);
 $stmt_leave_annual->bindParam(':userCode', $userCode);
 $stmt_leave_annual->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt_leave_annual->bindParam(':approveStatus', $approveStatus);
 $stmt_leave_annual->execute();
 $result_leave_annual = $stmt_leave_annual->fetch(PDO::FETCH_ASSOC);
 
@@ -811,14 +816,12 @@ WHERE l_leave_id = 6
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
 ";
 
 $result_absence_work = $conn->prepare($sql_absence_work);
 $result_absence_work->bindParam(':userCode', $userCode);
 $result_absence_work->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$result_absence_work->bindParam(':approveStatus', $approveStatus);
 $result_absence_work->execute();
 $stop_work = $result_absence_work->fetch(PDO::FETCH_ASSOC);
 
@@ -853,7 +856,7 @@ if ($stop_work) {
 
     echo '<div class="d-flex justify-content-between">';
     echo '<div>';
-    echo '<h5>' . $stop_work_days . '(' . $stop_work_hours . '.' . $stop_work_minutes . ')'.'</h5>';
+    echo '<h5>' . $stop_work_days . '(' . $stop_work_hours . '.' . $stop_work_minutes . ')' . '</h5>';
     echo '<input type="hidden" name="leave_annual_days" value="' . $stop_work_days . '">';
     echo '<input type="hidden" name="total_annual" value="' . $total_annual . '">'; // Ensure $total_annual is fetched or calculated properly
     echo '</div>';
@@ -905,14 +908,12 @@ WHERE l_leave_id = 8
 AND l_usercode = :userCode
 AND YEAR(l_create_datetime) = :selectedYear
 AND l_leave_status = 0
-AND l_approve_status = :approveStatus
 AND l_approve_status2 = 4
 ";
 
 $stmt_other = $conn->prepare($sql_other);
 $stmt_other->bindParam(':userCode', $userCode);
 $stmt_other->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
-$stmt_other->bindParam(':approveStatus', $approveStatus);
 $stmt_other->execute();
 $result_other = $stmt_other->fetch(PDO::FETCH_ASSOC);
 
@@ -1031,22 +1032,29 @@ if ($result_other) {
                                     <select class="form-select" id="startTime" name="startTime" required>
                                         <option value="08:00" selected>08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00">16:40</option>
                                     </select>
                                 </div>
@@ -1063,22 +1071,29 @@ if ($result_other) {
                                     <select class="form-select" id="endTime" name="endTime" required>
                                         <option value="08:00">08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00" selected>16:40</option>
                                     </select>
                                 </div>
@@ -1175,22 +1190,29 @@ if ($result2->rowCount() > 0) {
                                     <select class="form-select" id="urgentStartTime" name="urgentStartTime" required>
                                         <option value="08:00" selected>08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00">16:40</option>
                                     </select>
                                 </div>
@@ -1208,22 +1230,29 @@ if ($result2->rowCount() > 0) {
                                     <select class="form-select" id="urgentEndTime" name="urgentEndTime" required>
                                         <option value="08:00">08:00</option>
                                         <option value="08:30">08:30</option>
+                                        <option value="08:45">08:45</option>
                                         <option value="09:00">09:00</option>
                                         <option value="09:30">09:30</option>
+                                        <option value="09:45">09:45</option>
                                         <option value="10:00">10:00</option>
                                         <option value="10:30">10:30</option>
+                                        <option value="10:45">10:45</option>
                                         <option value="11:00">11:00</option>
-                                        <!-- <option value="11:30">11:30</option> -->
                                         <option value="12:00">11:45</option>
                                         <option value="13:00">12:45</option>
-                                        <!-- <option value="13:00">13:00</option> -->
+                                        <option value="13:10">13:10</option>
                                         <option value="13:30">13:30</option>
+                                        <option value="13:40">13:40</option>
                                         <option value="14:00">14:00</option>
+                                        <option value="14:10">14:10</option>
                                         <option value="14:30">14:30</option>
+                                        <option value="14:40">14:40</option>
                                         <option value="15:00">15:00</option>
+                                        <option value="15:10">15:10</option>
                                         <option value="15:30">15:30</option>
+                                        <option value="15:40">15:40</option>
                                         <option value="16:00">16:00</option>
-                                        <!-- <option value="16:30">16:30</option> -->
+                                        <option value="16:10">16:10</option>
                                         <option value="17:00" selected>16:40</option>
                                     </select>
                                 </div>
@@ -1301,8 +1330,13 @@ if (!isset($_GET['page'])) {
 }
 
 // สร้างคำสั่ง SQL
-$sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' AND Month(l_leave_start_date) = '$selectedMonth'
-AND Year(l_leave_start_date) = '$selectedYear' AND l_leave_id <> 6 ORDER BY l_create_datetime DESC ";
+$sql = "SELECT * FROM leave_list WHERE l_usercode = '$userCode' ";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(l_leave_start_date) = '$selectedMonth'";
+}
+
+$sql .= " AND Year(l_leave_start_date) = '$selectedYear' ORDER BY l_create_datetime DESC ";
 
 // หาจำนวนรายการทั้งหมด
 $result = $conn->query($sql);
@@ -1396,27 +1430,116 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        if ($row['l_leave_start_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        // 08:45
+        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
         }
 
-        // echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
-
-        // 10
-        if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '11:45:00' . '</td>';
-
-        } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_end_date'] . '<br> ' . '16:40:00' . '</td>';
+// 10
+        // 08:45
+        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
 
@@ -1520,7 +1643,7 @@ if ($result->rowCount() > 0) {
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>อนุมัติ</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
@@ -1533,6 +1656,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -1565,6 +1690,8 @@ if ($result->rowCount() > 0) {
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
             echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+        } elseif ($row['l_approve_status2'] == 6) {
+            echo '';
         }
         // ไม่มีสถานะ
         else {
@@ -1585,12 +1712,24 @@ if ($result->rowCount() > 0) {
 
         // 18
         $disabled = $row['l_leave_status'] == 1 ? 'disabled' : '';
-        if ($row['l_leave_id'] != 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
+
+        $dateNow = date('Y-m-d');
+        $disabledCancalCheck = (
+            $row['l_approve_status'] != 0
+            && $row['l_approve_status2'] != 1
+            && $row['l_leave_start_date'] <= $dateNow
+        ) ? 'disabled' : '';
+
+        $disabledConfirmCheck = ($row['l_late_datetime'] != null) ? 'disabled' : '';
+
+        if ($row['l_leave_id'] == 6) {
+            echo '<td></td>';
         } else if ($row['l_leave_id'] == 7) {
-            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . '>ยืนยันรายการ</button></td>';
+            echo '<td><button type="button" class="button-shadow btn btn-primary confirm-late-btn" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledConfirmCheck . '>ยืนยันรายการ</button></td>';
+        } else if ($row['l_leave_id'] != 7) {
+            echo '<td><button type="button" class="button-shadow btn btn-danger cancel-leave-btn" data-leaveid="' . $row['l_leave_id'] . '" data-createdatetime="' . $row['l_create_datetime'] . '" data-usercode="' . $userCode . '" ' . $disabled . $disabledCancalCheck . '><i class="fa-solid fa-times"></i> ยกเลิกรายการ</button></td>';
         } else {
-            echo '<td></td>'; // กรณีที่ l_leave_id เท่ากับ 7 ไม่แสดงปุ่มและเว้นคอลัมน์ว่าง
+            echo '<td></td>';
         }
 
         echo '</tr>';
@@ -1613,8 +1752,8 @@ echo '<ul class="pagination">';
 
 // สร้างลิงก์ไปยังหน้าแรกหรือหน้าก่อนหน้า
 if ($currentPage > 1) {
-    echo '<li class="page-item"><a class="page-link" href="?page=1">&laquo;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '">&lt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=1&month=' . urlencode($selectedMonth) . '">&laquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage - 1) . '&month=' . urlencode($selectedMonth) . '">&lt;</a></li>';
 }
 
 // สร้างลิงก์สำหรับแต่ละหน้า
@@ -1622,16 +1761,15 @@ for ($i = 1; $i <= $totalPages; $i++) {
     if ($i == $currentPage) {
         echo '<li class="page-item active"><span class="page-link">' . $i . '</span></li>';
     } else {
-        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '">' . $i . '</a></li>';
+        echo '<li class="page-item"><a class="page-link" href="?page=' . $i . '&month=' . urlencode($selectedMonth) . '">' . $i . '</a></li>';
     }
 }
 
 // สร้างลิงก์ไปยังหน้าถัดไปหรือหน้าสุดท้าย
 if ($currentPage < $totalPages) {
-    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '">&gt;</a></li>';
-    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '">&raquo;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . ($currentPage + 1) . '&month=' . urlencode($selectedMonth) . '">&gt;</a></li>';
+    echo '<li class="page-item"><a class="page-link" href="?page=' . $totalPages . '&month=' . urlencode($selectedMonth) . '">&raquo;</a></li>';
 }
-
 echo '</ul>';
 echo '</div>';
 
@@ -1845,9 +1983,10 @@ echo '</div>';
             }
 
             var createDate = new Date();
+            createDate.setHours(createDate.getHours() + 7); // Adjust to Thai timezone (UTC+7)
             var formattedDate = createDate.toISOString().slice(0, 19).replace('T', ' ');
-            fd.append(
-                'formattedDate', formattedDate);
+            fd.append('formattedDate', formattedDate);
+            // alert(formattedDate);
 
             // ตรวจสอบหากมี alert ถูกแสดง (ไม่มี class d-none)
             if (!$('*[name="alertCheckDays"]').hasClass('d-none')) {

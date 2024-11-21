@@ -3,6 +3,8 @@ session_start();
 date_default_timezone_set('Asia/Bangkok');
 
 include '../connect.php';
+include '../session_lang.php';
+
 if (!isset($_SESSION['s_usercode'])) {
     header('Location: ../login.php');
     exit();
@@ -78,21 +80,23 @@ echo "</select>";
             <div class="col-auto">
                 <?php
 $months = [
-    '01' => 'มกราคม',
-    '02' => 'กุมภาพันธ์',
-    '03' => 'มีนาคม',
-    '04' => 'เมษายน',
-    '05' => 'พฤษภาคม',
-    '06' => 'มิถุนายน',
-    '07' => 'กรกฎาคม',
-    '08' => 'สิงหาคม',
-    '09' => 'กันยายน',
-    '10' => 'ตุลาคม',
-    '11' => 'พฤศจิกายน',
-    '12' => 'ธันวาคม',
+    'All' => $strAllMonth,
+    '01' => $strJan,
+    '02' => $strFeb,
+    '03' => $strMar,
+    '04' => $strApr,
+    '05' => $strMay,
+    '06' => $strJun,
+    '07' => $strJul,
+    '08' => $strAug,
+    '09' => $strSep,
+    '10' => $strOct,
+    '11' => $strNov,
+    '12' => $strDec,
 ];
 
-$selectedMonth = date('m'); // เดือนปัจจุบัน
+// $selectedMonth = date('m'); // เดือนปัจจุบัน
+$selectedMonth = 'All';
 
 if (isset($_POST['month'])) {
     $selectedMonth = $_POST['month'];
@@ -130,35 +134,50 @@ echo "</select>";
 // AND l_level = 'user'
 // AND l_leave_id <> 6
 // AND l_leave_id <> 7";
-$sql = "SELECT 
+$sql = "SELECT
 COUNT(li.l_list_id) AS totalLeaveItems,
 em.*,
 li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
+WHERE
     -- AND li.l_approve_status = 0
     li.l_level = 'user'
     AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        -- (em.e_department = :subDepart AND li.l_department = :subDepart)
+        -- OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+}
+$sql .= " AND (
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
+    )";
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':subDepart2', $subDepart2);
 $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -175,7 +194,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาทั้งหมด
+                            <?php echo $strAll; ?>
                         </p>
                     </div>
                 </div>
@@ -197,28 +216,37 @@ li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
+WHERE
     li.l_approve_status = 0
     AND li.l_level = 'user'
     AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        -- (em.e_department = :subDepart AND li.l_department = :subDepart)
+        -- OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth";
+}
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':subDepart2', $subDepart2);
 $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
 
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth);
+}
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -236,7 +264,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่รออนุมัติ
+                            <?php echo $strPendProve; ?>
                         </p>
                     </div>
                 </div>
@@ -254,28 +282,36 @@ li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
+WHERE
     li.l_approve_status = 2
     AND li.l_level = 'user'
     AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        -- (em.e_department = :subDepart AND li.l_department = :subDepart)
+        -- OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+if ($selectedMonth != "All") {
+    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+}
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':subDepart2', $subDepart2);
 $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth);
+}
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -293,7 +329,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่อนุมัติ
+                            <?php echo $strProve; ?>
                         </p>
                     </div>
                 </div>
@@ -311,28 +347,34 @@ li.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
-WHERE 
+WHERE
     li.l_approve_status = 3
     AND li.l_level = 'user'
     AND li.l_leave_id NOT IN (6, 7)
     AND (
-        (em.e_department = :subDepart AND li.l_department = :subDepart)
-        OR li.l_department IN (:subDepart, :subDepart2, :subDepart3, :subDepart4, :subDepart5)
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-    AND YEAR(li.l_create_datetime) = :selectedYear
-    AND MONTH(li.l_create_datetime) = :selectedMonth";
-
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+if ($selectedMonth != "All") {
+    $sql .= " AND MONTH(li.l_leave_end_date) = :selectedMonth";
+}
 $stmt = $conn->prepare($sql);
 
 // Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
 $stmt->bindParam(':subDepart', $subDepart);
 $stmt->bindParam(':subDepart2', $subDepart2);
 $stmt->bindParam(':subDepart3', $subDepart3);
 $stmt->bindParam(':subDepart4', $subDepart4);
 $stmt->bindParam(':subDepart5', $subDepart5);
 $stmt->bindParam(':selectedYear', $selectedYear);
-$stmt->bindParam(':selectedMonth', $selectedMonth);
-
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth);
+}
 // Execute and check for errors
 if ($stmt->execute()) {
     $totalLeaveItems = $stmt->fetchColumn();
@@ -350,7 +392,7 @@ if ($stmt->execute()) {
                             </div>
                         </h5>
                         <p class="card-text">
-                            รายการลาที่ไม่อนุมัติ
+                            <?php echo $strNotProve; ?>
                         </p>
                     </div>
                 </div>
@@ -360,35 +402,33 @@ if ($stmt->execute()) {
     <!-- ตารางข้อมูลการลา -->
     <div class="container-fluid">
         <div class="table-responsive">
-
             <table class="table table-hover" style="border-top: 1px solid rgba(0, 0, 0, 0.1);" id="leaveTable">
                 <thead>
                     <tr class="text-center align-middle">
-                        <th rowspan="2">ลำดับ</th>
-                        <th rowspan="2">รหัสพนักงาน</th>
-                        <th rowspan="1">ชื่อ - นามสกุล</th>
-                        <th rowspan="2">วันที่ยื่นใบลา</th>
-                        <th rowspan="1">ประเภทการลา</th>
-                        <th colspan="2" class="text-center">วันเวลาที่ลา</th>
-                        <th rowspan="2">ไฟล์แนบ</th>
-                        <th rowspan="2">สถานะใบลา</th>
-                        <th rowspan="2">สถานะอนุมัติ_1</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_1</th>
-                        <th rowspan="2">เหตุผล_1</th>
-                        <th rowspan="2">หัวหน้า</th>
-                        <th rowspan="2">สถานะอนุมัติ_2</th>
-                        <th rowspan="2">วันเวลาอนุมัติ_2</th>
-                        <th rowspan="2">เหตุผล_2</th>
-                        <th rowspan="2">ผู้จัดการขึ้นไป</th>
-                        <th rowspan="2">สถานะ (เฉพาะ HR)</th>
-                        <th rowspan="2"></th>
+                        <th rowspan="2"><?php echo $strNo; ?></th>
+                        <th rowspan="2"><?php echo $strEmpCode; ?></th>
+                        <th rowspan="1"><?php echo $strEmpName; ?></th>
+                        <th rowspan="2"><?php echo $strSubDate; ?></th>
+                        <th rowspan="1"><?php echo $strLeaveType; ?></th>
+                        <th colspan="2" class="text-center"><?php echo $strDateTime; ?></th>
+                        <th rowspan="2"><?php echo $strFile; ?></th>
+                        <th rowspan="2"><?php echo $strListStatus; ?></th>
+                        <th rowspan="2"><?php echo $strStatus1; ?></th>
+                        <th rowspan="2"><?php echo $strProveDate1; ?></th>
+                        <th rowspan="2"><?php echo $strReason1; ?></th>
+                        <th rowspan="2"><?php echo $strProveName1; ?></th>
+                        <th rowspan="2"><?php echo $strStatus2; ?></th>
+                        <th rowspan="2"><?php echo $strProveDate2; ?></th>
+                        <th rowspan="2"><?php echo $strReason2; ?></th>
+                        <th rowspan="2"><?php echo $strProveName2; ?></th>
+                        <th rowspan="2"><?php echo $strStatusHR; ?></th>
                         <th rowspan="2"></th>
                     </tr>
                     <tr class="text-center">
                         <th> <input type="text" class="form-control" id="nameSearch"></th>
                         <th> <input type="text" class="form-control" id="leaveSearch"></th>
-                        <th style="width: 8%;">จาก</th>
-                        <th style="width: 8%;">ถึง</th>
+                        <th style="width: 8%;"><?php echo $strFrom; ?></th>
+                        <th style="width: 8%;"><?php echo $strTo; ?></th>
                     </tr>
                 </thead>
                 <tbody class="text-center">
@@ -415,52 +455,84 @@ if (!isset($_GET['page'])) {
 
 $sql = "SELECT
     li.*,
-    em.e_department,
-    em.e_sub_department,
-    em.e_sub_department2,
-    em.e_sub_department3,
-    em.e_sub_department4,
-    em.e_sub_department5
+    em.*
 FROM leave_list li
 INNER JOIN employees em
     ON li.l_usercode = em.e_usercode
 WHERE
     li.l_approve_status IN (0, 1, 2, 3, 6)
     AND li.l_level IN ('user')
-    AND li.l_leave_id NOT IN (6, 7)
-    AND YEAR(li.l_create_datetime) = '$selectedYear'
-    AND MONTH(li.l_create_datetime) = '$selectedMonth'
-    AND (
-        -- Check for matching department or sub-department
-        (em.e_department = '$subDepart' AND li.l_department = '$subDepart')
-        OR (li.l_department = '$subDepart2')
-        OR (li.l_department = '$subDepart3')
-        OR (li.l_department = '$subDepart4')
-        OR (li.l_department = '$subDepart5')
+    AND li.l_leave_id NOT IN (7)
+    AND YEAR(li.l_leave_end_date) = :selectedYear";
+
+if ($selectedMonth != "All") {
+    $sql .= " AND Month(li.l_leave_end_date) = :selectedMonth ";
+}
+
+$sql .= " AND (
+        (em.e_sub_department = :subDepart AND li.l_department = :depart)
+        OR (em.e_sub_department2 = :subDepart2 AND li.l_department = :depart)
+        OR (em.e_sub_department3 = :subDepart3 AND li.l_department = :depart)
+        OR (em.e_sub_department4 = :subDepart4 AND li.l_department = :depart)
+        OR (em.e_sub_department5 = :subDepart5 AND li.l_department = :depart)
     )
-ORDER BY l_create_datetime DESC";
+ORDER BY li.l_create_datetime DESC";
 
-$result = $conn->query($sql);
-$totalRows = $result->rowCount();
+// Prepare the statement
+$stmt = $conn->prepare($sql);
 
-// คำนวณหน้าทั้งหมด
+// Bind parameters
+$stmt->bindParam(':depart', $depart); // Corrected parameter name from ':dapart' to ':dpart'
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute the query to get the total number of rows
+$stmt->execute();
+$totalRows = $stmt->rowCount();
+
+// Calculate total pages
 $totalPages = ceil($totalRows / $itemsPerPage);
 
-// คำนวณ offset สำหรับ pagination
+// Calculate offset for pagination
 $offset = ($currentPage - 1) * $itemsPerPage;
 
-// เพิ่ม LIMIT และ OFFSET ในคำสั่ง SQL
-$sql .= " LIMIT $itemsPerPage OFFSET $offset";
+// Add LIMIT and OFFSET to the SQL statement for pagination
+$sql .= " LIMIT :limit OFFSET :offset";
 
-// ประมวลผลคำสั่ง SQL
-$result = $conn->query($sql);
+// Prepare the final query with pagination
+$stmt = $conn->prepare($sql);
 
-// แสดงผลลำดับของแถว
-$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage; // กำหนดลำดับของแถว
+// Bind the limit and offset parameters
+$stmt->bindParam(':limit', $itemsPerPage, PDO::PARAM_INT);
+$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
 
-// แสดงข้อมูลในตาราง
-if ($result->rowCount() > 0) {
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+// Bind the parameters again for the final query
+$stmt->bindParam(':depart', $depart); // Make sure this is bound correctly
+$stmt->bindParam(':subDepart', $subDepart);
+$stmt->bindParam(':subDepart2', $subDepart2);
+$stmt->bindParam(':subDepart3', $subDepart3);
+$stmt->bindParam(':subDepart4', $subDepart4);
+$stmt->bindParam(':subDepart5', $subDepart5);
+$stmt->bindParam(':selectedYear', $selectedYear, PDO::PARAM_INT);
+if ($selectedMonth != "All") {
+    $stmt->bindParam(':selectedMonth', $selectedMonth, PDO::PARAM_INT);
+}
+// Execute the paginated query
+$stmt->execute();
+
+// Display row number starting from the correct count
+$rowNumber = $totalRows - ($currentPage - 1) * $itemsPerPage;
+
+// Show data in the table
+if ($stmt->rowCount() > 0) {
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         echo '<tr class="align-middle">';
 
         // 0
@@ -531,26 +603,119 @@ if ($result->rowCount() > 0) {
         echo '</td>';
 
         // 9
-        if ($row['l_leave_start_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_start_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+        // 08:45
+        if ($row['l_leave_start_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_start_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_start_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_start_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_start_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_start_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_start_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_start_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_start_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_start_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_start_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_start_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_start_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_start_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_start_date'] . '<br> ' . $row['l_leave_start_time'] . '</td>';
         }
-        // 10
-        if ($row['l_leave_end_time'] == '12:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '11:45:00' . '</td>';
 
-        } else if ($row['l_leave_end_time'] == '13:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '12:45:00' . '</td>';
-        } else if ($row['l_leave_end_time'] == '17:00:00') {
-            echo '<td>' . $row['l_leave_start_date'] . '<br> ' . '16:40:00' . '</td>';
+// 10
+        // 08:45
+        if ($row['l_leave_end_time'] == '09:00:00' && $row['l_remark'] == '08:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 08:45:00</td>';
+        }
+// 09:45
+        else if ($row['l_leave_end_time'] == '10:00:00' && $row['l_remark'] == '09:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 09:45:00</td>';
+        }
+// 10:45
+        else if ($row['l_leave_end_time'] == '11:00:00' && $row['l_remark'] == '10:45:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 10:45:00</td>';
+        }
+// 11:45
+        else if ($row['l_leave_end_time'] == '12:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 11:45:00</td>';
+        }
+// 12:45
+        else if ($row['l_leave_end_time'] == '13:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 12:45:00</td>';
+        }
+// 13:10
+        else if ($row['l_leave_end_time'] == '13:30:00' && $row['l_remark'] == '13:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:10:00</td>';
+        }
+// 13:40
+        else if ($row['l_leave_end_time'] == '14:00:00' && $row['l_remark'] == '13:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 13:40:00</td>';
+        }
+// 14:10
+        else if ($row['l_leave_end_time'] == '14:30:00' && $row['l_remark'] == '14:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:10:00</td>';
+        }
+// 14:40
+        else if ($row['l_leave_end_time'] == '15:00:00' && $row['l_remark'] == '14:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 14:40:00</td>';
+        }
+// 15:10
+        else if ($row['l_leave_end_time'] == '15:30:00' && $row['l_remark'] == '15:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:10:00</td>';
+        }
+// 15:40
+        else if ($row['l_leave_end_time'] == '16:00:00' && $row['l_remark'] == '15:40:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 15:40:00</td>';
+        }
+// 16:10
+        else if ($row['l_leave_end_time'] == '16:30:00' && $row['l_remark'] == '16:10:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:10:00</td>';
+        }
+// 16:40
+        else if ($row['l_leave_end_time'] == '17:00:00') {
+            echo '<td>' . $row['l_leave_end_date'] . '<br> 16:40:00</td>';
         } else {
+            // กรณีอื่น ๆ แสดงเวลาตาม l_leave_start_time
             echo '<td>' . $row['l_leave_end_date'] . '<br> ' . $row['l_leave_end_time'] . '</td>';
         }
+
         // 11
         echo '</td>';
         if (!empty($row['l_file'])) {
@@ -563,9 +728,9 @@ if ($result->rowCount() > 0) {
         // 12
         echo '<td>';
         if ($row['l_leave_status'] == 0) {
-            echo '<span class="text-success">ปกติ</span>';
+            echo '<span class="text-success">' . $strStatusNormal . '</span>';
         } else {
-            echo '<span class="text-danger">ยกเลิกใบลา</span>';
+            echo '<span class="text-danger">' . $strStatusCancel . '</span>';
         }
         echo '</td>';
 
@@ -573,27 +738,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
         } elseif ($row['l_approve_status'] == 6) {
             echo '';
         }
@@ -616,27 +781,27 @@ if ($result->rowCount() > 0) {
         echo '<td>';
         // รอหัวหน้าอนุมัติ
         if ($row['l_approve_status2'] == 0) {
-            echo '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>' . $strStatusProve0 . '</b></div>';
         }
         // รอผจกอนุมัติ
         elseif ($row['l_approve_status2'] == 1) {
-            echo '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-warning"><b>' . $strStatusProve1 . '</b></div>';
         }
         // หัวหน้าอนุมัติ
         elseif ($row['l_approve_status2'] == 2) {
-            echo '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>' . $strStatusProve2 . '</b></div>';
         }
         // หัวหน้าไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 3) {
-            echo '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>' . $strStatusProve3 . '</b></div>';
         }
         //  ผจก อนุมัติ
         elseif ($row['l_approve_status2'] == 4) {
-            echo '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+            echo '<div class="text-success"><b>' . $strStatusProve4 . '</b></div>';
         }
         //  ผจก ไม่อนุมัติ
         elseif ($row['l_approve_status2'] == 5) {
-            echo '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+            echo '<div class="text-danger"><b>' . $strStatusProve5 . '</b></div>';
         } elseif ($row['l_approve_status2'] == 6) {
             echo '';
         }
@@ -658,11 +823,11 @@ if ($result->rowCount() > 0) {
         // 21
         echo '<td >';
         if ($row['l_hr_status'] == 0) {
-            echo '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
+            echo '<span class="text-warning"><b>' . $strStatusHR0 . '</b></span>';
         } elseif ($row['l_hr_status'] == 1) {
-            echo '<div class="text-success"><b>ผ่าน</b></div>';
+            echo '<span class="text-success"><b>' . $strStatusHR1 . '</b></span>';
         } elseif ($row['l_hr_status'] == 2) {
-            echo '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+            echo '<span class="text-danger"><b>' . $strStatusHR2 . '</b></span>';
         } else {
             echo $row['l_hr_status'];
         }
@@ -670,9 +835,9 @@ if ($result->rowCount() > 0) {
 
         // 22 ปุ่มตรวจสอบ
         if ($row['l_approve_status'] == 2 || $row['l_approve_status'] == 3) {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' >ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal' disabled>$btnCheck</button></td>";
         } else {
-            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>ตรวจสอบ</button></td>";
+            echo "<td><button type='button' class='btn btn-primary leaveChk' data-bs-toggle='modal' data-bs-target='#leaveModal'>$btnCheck</button></td>";
         }
 
         // 23
@@ -688,7 +853,8 @@ if ($result->rowCount() > 0) {
 ?>
                 </tbody>
             </table>
-            <?php
+        </div>
+        <?php
 echo '<div class="pagination">';
 echo '<ul class="pagination">';
 
@@ -717,42 +883,41 @@ echo '</ul>';
 echo '</div>';
 
 ?>
-            <!-- Modal เช็คการลา -->
-            <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-                aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title
+        <!-- Modal เช็คการลา -->
+        <div class="modal fade" id="leaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title
                         01f s-5" id="staticBackdropLabel">รายละเอียดการลา</h4>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
-                        </div>
-                        <div class="modal-body">
-
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger button-shadow">ไม่อนุมัติ</button>
-                            <button type="button" class="btn btn-success button-shadow">อนุมัติ</button>
-                        </div>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">X</button>
                     </div>
-                </div>
-            </div>
-            <!-- Modal HTML -->
-            <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
-                        </div>
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger button-shadow"><?php echo $btnNotProve; ?></button>
+                        <button type="button" class="btn btn-success button-shadow"><?php echo $btnProve; ?></button>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Modal HTML -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">ประวัติการลา</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- ประวัติการลาจะถูกโหลดที่นี่ -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     <script>
     $(".leaveChk").click(function() {
@@ -809,8 +974,9 @@ echo '</div>';
             var status = '2'; // อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
-            // alert(leaveStatus)
+            // alert(level)
             $.ajax({
                 url: 'l_ajax_upd_status.php',
                 method: 'POST',
@@ -826,11 +992,21 @@ echo '</div>';
                     leaveEndDate: leaveEndDate,
                     depart: depart,
                     empName: empName,
-                    leaveStatus: leaveStatus
+                    leaveStatus: leaveStatus,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide');
-                    location.reload(); // Reload the page after successful update
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'อนุมัติใบลาสำเร็จ !',
+                        confirmButtonText: 'ตกลง'
+                    }).then((result) => {
+                        if (result
+                            .isConfirmed) {
+                            location.reload();
+                        }
+                    });
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -884,7 +1060,6 @@ echo '</div>';
                 }
             });
 
-
             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -898,6 +1073,7 @@ echo '</div>';
             var status = '3'; // ไม่อนุมัติ
             var userName = '<?php echo $userName; ?>';
             var proveName = '<?php echo $name; ?>';
+            var level = '<?php echo $level; ?>';
 
             var reason = reasonNoProve;
 
@@ -917,18 +1093,20 @@ echo '</div>';
                     depart: depart,
                     leaveStatus: leaveStatus,
                     empName: empName,
-                    reasonNoProve: reasonNoProve
+                    reasonNoProve: reasonNoProve,
+                    level: level
                 },
                 success: function(response) {
                     $('#leaveModal').modal('hide'); // ปิด modal
                     Swal.fire({
-                        title: 'สำเร็จ!',
-                        text: 'ทำรายการเสร็จสิ้น',
+                        title: 'ไม่อนุมัติสำเร็จ !',
+                        // text: 'ทำรายการเสร็จสิ้น',
                         icon: 'success',
                         confirmButtonText: 'ตกลง'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            location.reload(); // โหลดหน้าใหม่เมื่อกดตกลง
+                            location
+                                .reload(); // โหลดหน้าใหม่เมื่อกดตกลง
                         }
                     });
                 },
@@ -940,20 +1118,36 @@ echo '</div>';
     });
 
     $(".filter-card").click(function() {
+        /* edit by pim */
+        // ลบ active จากการ์ดทั้งหมด
+        $(".filter-card .card").removeClass("active");
+
+        // เพิ่ม active ให้การ์ดภายใน filter-card ที่คลิก
+        $(this).find(".card").addClass("active");
+
         var status = $(this).data("status");
         var selectedMonth = $("#selectedMonth").val();
+        var selectedYear = $("#selectedYear").val();
         var depart = <?php echo json_encode($depart); ?>;
         var subDepart = <?php echo json_encode($subDepart); ?>;
+        var subDepart2 = "<?php echo $subDepart2 ?>";
+        var subDepart3 = "<?php echo $subDepart3 ?>";
+        var subDepart4 = "<?php echo $subDepart4 ?>";
+        var subDepart5 = "<?php echo $subDepart5 ?>";
 
-        // alert(subDepart)
         $.ajax({
             url: 'l_ajax_get_leave_data.php',
             method: 'GET',
             data: {
                 status: status,
                 month: selectedMonth,
+                year: selectedYear,
                 depart: depart,
-                subDepart: subDepart
+                subDepart: subDepart,
+                subDepart2: subDepart2,
+                subDepart3: subDepart3,
+                subDepart4: subDepart4,
+                subDepart5: subDepart5
             },
             dataType: 'json',
             success: function(data) {
@@ -992,9 +1186,11 @@ echo '</div>';
                         // สถานะใบลา
                         var leaveStatus = '';
                         if (row['l_leave_status'] == 0) {
-                            leaveStatus = '<div class="text-success">ปกติ</div>';
+                            leaveStatus =
+                                '<div class="text-success"><?=$strStatusNormal?></div>';
                         } else if (row['l_leave_status'] == 1) {
-                            leaveStatus = '<div class="text-danger">ยกเลิกใบลา</div>';
+                            leaveStatus =
+                                '<div class="text-danger"><?=$strStatusCancel?></div>';
                         } else {
                             leaveStatus = 'ไม่พบสถานะใบลา';
                         }
@@ -1002,13 +1198,13 @@ echo '</div>';
                         var confirmStatus = '';
                         if (row['l_hr_status'] == 0) {
                             confirmStatus =
-                                '<div class="text-warning"><b>รอตรวจสอบ</b></div>';
+                                '<div class="text-warning"><b><?=$strStatusHR0?></b></div>';
                         } else if (row['l_hr_status'] == 1) {
                             confirmStatus =
-                                '<div class="text-success"><b>ผ่าน</b></div>';
+                                '<div class="text-success"><b><?=$strStatusHR1?></b></div>';
                         } else if (row['l_hr_status'] == 2) {
                             confirmStatus =
-                                '<div class="text-danger"><b>ไม่ผ่าน</b></div>';
+                                '<div class="text-danger"><b><?=$strStatusHR2?></b></div>';
                         } else {
                             confirmStatus = row['l_hr_status'];
                         }
@@ -1016,22 +1212,25 @@ echo '</div>';
                         var approveStatus;
                         if (row['l_approve_status'] == 0) {
                             approveStatus =
-                                '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
                         } else if (row['l_approve_status'] == 1) {
                             approveStatus =
-                                '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
                         } else if (row['l_approve_status'] == 2) {
                             approveStatus =
-                                '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
                         } else if (row['l_approve_status'] == 3) {
                             approveStatus =
-                                '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
                         } else if (row['l_approve_status'] == 4) {
                             approveStatus =
-                                '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
                         } else if (row['l_approve_status'] == 5) {
                             approveStatus =
-                                '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus =
+                                '';
                         } else {
                             approveStatus = 'ไม่พบสถานะ';
                         }
@@ -1042,22 +1241,25 @@ echo '</div>';
                         var approveStatus2;
                         if (row['l_approve_status2'] == 0) {
                             approveStatus2 =
-                                '<div class="text-warning"><b>รอหัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?=$strStatusProve0?></b></div>';
                         } else if (row['l_approve_status2'] == 1) {
                             approveStatus2 =
-                                '<div class="text-warning"><b>รอผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-warning"><b><?=$strStatusProve1?></b></div>';
                         } else if (row['l_approve_status2'] == 2) {
                             approveStatus2 =
-                                '<div class="text-success"><b>หัวหน้าอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?=$strStatusProve2?></b></div>';
                         } else if (row['l_approve_status2'] == 3) {
                             approveStatus2 =
-                                '<div class="text-danger"><b>หัวหน้าไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?=$strStatusProve3?></b></div>';
                         } else if (row['l_approve_status2'] == 4) {
                             approveStatus2 =
-                                '<div class="text-success"><b>ผู้จัดการอนุมัติ</b></div>';
+                                '<div class="text-success"><b><?=$strStatusProve4?></b></div>';
                         } else if (row['l_approve_status2'] == 5) {
                             approveStatus2 =
-                                '<div class="text-danger"><b>ผู้จัดการไม่อนุมัติ</b></div>';
+                                '<div class="text-danger"><b><?=$strStatusProve5?></b></div>';
+                        } else if (row['l_approve_status'] == 6) {
+                            approveStatus2 =
+                                '';
                         } else {
                             approveStatus2 = 'ไม่พบสถานะ';
                         }
@@ -1250,10 +1452,10 @@ echo '</div>';
                             '<td>';
                         if (row['l_approve_status'] == 2 || row['l_approve_status'] == 3) {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?=$btnCheck?></button>';
                         } else {
                             newRow +=
-                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal">ตรวจสอบ</button>';
+                                '<button type="button" class="btn btn-primary leaveChk" data-bs-toggle="modal" data-bs-target="#leaveModal"><?=$btnCheck?></button>';
                         }
                         newRow += '</td>' +
 
@@ -1326,10 +1528,10 @@ echo '</div>';
                                     .text(); // วันเวลาที่ลาสิ้นสุด
                                 var leaveStatus = $(rowData[12]).text(); // สถานะใบลา
 
-
                                 var status = '2'; // อนุมัติ
                                 var userName = '<?php echo $userName; ?>';
                                 var proveName = '<?php echo $name; ?>';
+                                var level = '<?php echo $level; ?>';
 
                                 $.ajax({
                                     url: 'l_ajax_upd_status.php',
@@ -1346,12 +1548,21 @@ echo '</div>';
                                         leaveEndDate: leaveEndDate,
                                         depart: depart,
                                         leaveStatus: leaveStatus,
-                                        empName: empName
+                                        empName: empName,
+                                        level: level
                                     },
                                     success: function(response) {
                                         $('#leaveModal').modal('hide');
-                                        location
-                                            .reload(); // Reload the page after successful update
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'อนุมัติใบลาสำเร็จ !',
+                                            confirmButtonText: 'ตกลง'
+                                        }).then((result) => {
+                                            if (result
+                                                .isConfirmed) {
+                                                location.reload();
+                                            }
+                                        });
                                     },
                                     error: function(xhr, status, error) {
                                         console.error(error);
@@ -1411,7 +1622,6 @@ echo '</div>';
                                 }
                             });
 
-
                             var userCode = $(rowData[5]).text(); // รหัสพนักงาน
                             var createDate = $(rowData[7]).text(); // วันที่ยื่นใบลา
                             var leaveType = $(rowData[0]).text(); // ประเภทการลา
@@ -1426,6 +1636,7 @@ echo '</div>';
                             var status = '3'; // ไม่อนุมัติ
                             var userName = '<?php echo $userName; ?>';
                             var proveName = '<?php echo $name; ?>';
+                            var level = '<?php echo $level; ?>';
 
                             var reason = reasonNoProve;
 
@@ -1445,13 +1656,14 @@ echo '</div>';
                                     depart: depart,
                                     leaveStatus: leaveStatus,
                                     empName: empName,
-                                    reasonNoProve: reasonNoProve
+                                    reasonNoProve: reasonNoProve,
+                                    level: level
                                 },
                                 success: function(response) {
                                     $('#leaveModal').modal('hide'); // ปิด modal
                                     Swal.fire({
-                                        title: 'สำเร็จ!',
-                                        text: 'ทำรายการเสร็จสิ้น',
+                                        title: 'ไม่อนุมัติสำเร็จ !',
+                                        // text: 'ทำรายการเสร็จสิ้น',
                                         icon: 'success',
                                         confirmButtonText: 'ตกลง'
                                     }).then((result) => {
