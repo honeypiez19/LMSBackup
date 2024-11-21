@@ -2,5 +2,8 @@
     "require": {
         "tecnickcom/tc-lib-pdf": "^8.0",
         "tecnickcom/tcpdf": "^6.6"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.10"
     }
 }

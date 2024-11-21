@@ -59,7 +59,7 @@ foreach ($leaveRecords as $row) {
         $sqlLine = "";
 
         if ($level === 'user') {
-            echo 'eiei';
+            // echo 'eiei';
             $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
             FROM employees
             WHERE (e_level = 'chief' OR e_level = 'manager')
@@ -87,7 +87,7 @@ foreach ($leaveRecords as $row) {
                     e_sub_department5 = :depart
                 ))
             )";
-        }else if ($level === 'chief') {
+        } else if ($level === 'chief') {
             $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
             FROM employees
             WHERE (e_level = 'manager')
@@ -101,8 +101,7 @@ foreach ($leaveRecords as $row) {
                     e_sub_department5 = :depart
                 ))
             )";
-        }
-        else if ($level === 'manager') {
+        } else if ($level === 'manager') {
             $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
             FROM employees
             WHERE (e_level = 'GM')

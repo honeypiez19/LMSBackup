@@ -61,7 +61,7 @@ foreach ($leaveRecords as $row) {
         if ($level === 'leader') {
             $sqlLine = "SELECT e_username, e_level, e_token, e_department, e_sub_department, e_sub_department2, e_sub_department3, e_sub_department4, e_sub_department5
             FROM employees
-            WHERE (e_level = 'chief' OR e_level = 'manager')
+            WHERE (e_level = 'manager')
             AND (
                 e_department = :depart OR
                 (e_department != :depart AND (

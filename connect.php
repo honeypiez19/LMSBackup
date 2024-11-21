@@ -1,12 +1,12 @@
 <?php
 // $servername = "localhost";
-$servername = "192.168.100.122";
-$username = "samt";
-$password = "samtadmin12";
-$db = "LMS";
+$servername = "27.254.134.24";
+$username = "system_LMS";
+$password = "samt1234";
+$db = "system_LMS";
 // $db = "LMS2";
 
-$port = "3306";
+$port = "system_LMS";
 // Create connection
 // $conn = new mysqli($servername, $username, $password, $db, $port);
 
